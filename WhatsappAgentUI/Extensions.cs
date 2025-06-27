@@ -13,8 +13,10 @@ namespace WhatsappAgentUI
             textBox.Text = textBox.Text + line.Replace("\n", Environment.NewLine) + Environment.NewLine;
             if (textBox.Visible)
             {
+
                 textBox.SelectionStart = textBox.TextLength;
                 textBox.ScrollToCaret();
+                // code new commented
             }
         }
     }
