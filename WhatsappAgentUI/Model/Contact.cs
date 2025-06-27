@@ -1,25 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WhatsappAgent; // Required to access the MediaType enum
 
 namespace WhatsappAgentUI.Model
 {
-   public class Contact
+    /// <summary>
+    /// Represents a complete messaging task for a single contact.
+    /// It holds the recipient's number and all content (text or media) to be sent.
+    /// </summary>
+    public class Contact
     {
-        public Contact(long number)
+        /// <summary>
+        /// Default constructor, useful for data binding and initialization.
+        /// </summary>
+        public Contact() { }
+
+        /// <summary>
+        /// Creates a new contact task with a specified contact number.
+        /// </summary>
+        /// <param name="number">The recipient's phone number as a string.</param>
+        public Contact(string number)
         {
-            this.contactNumber = number;
-        }
-        private long contactNumber;
-
-        public long ContactNumber
-        {
-            get { return contactNumber; }   // get method
-            set { contactNumber = value; }  // set method
+            this.ContactNumber = number;
         }
 
-
+        // All the properties from your new version go here...
+        public string ContactNumber { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public MediaType? MediaType { get; set; }
+        public string FilePath { get; set; } = string.Empty;
+        public string Caption { get; set; } = string.Empty;
     }
 }
