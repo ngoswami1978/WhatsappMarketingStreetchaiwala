@@ -45,6 +45,7 @@ namespace WhatsappAgentUI
                 }
                 else
                 {
+                    lblcount.Text = contacts.Count.ToString();  
                     SendMessageToMultiple(contacts, message);
                 }
 
@@ -58,13 +59,18 @@ namespace WhatsappAgentUI
         }
         public void SendMessageToMultiple(List<Contact> numbers, string message)
         {
+            int totalCount = numbers.Count;
+            int currentCount = 0;
+
             foreach (var number in numbers)
             {
                 try
                 {
+                    currentCount++;
                     Messegner?.SendMessage(number.ContactNumber.ToString(), message);
                     //SendMessage(number, message);
                     textBox1.AppendLine($"Message sent to {number.ContactNumber}");
+                    lblcount.Text = $"{currentCount}/{totalCount}";
                 }
                 catch (Exception ex)
                 {
@@ -116,13 +122,18 @@ namespace WhatsappAgentUI
 
         public void SendMediaMessageToMultiple(List<Contact> numbers, string message,string FileName)
         {
+            int totalCount = numbers.Count;
+            int currentCount = 0;
+
             foreach (var number in numbers)
             {
                 try
                 {
-                    Messegner?.SendMedia(MediaType.ATTACHMENT, number.ContactNumber.ToString(), FileName, textmsg.Text);
+                    currentCount++;
+                    Messegner?.SendMedia(MediaType.IMAGE_OR_VIDEO, number.ContactNumber.ToString(), FileName, textmsg.Text);
                     //SendMessage(number, message);
                     textBox1.AppendLine($"Message sent to {number.ContactNumber}");
+                    lblcount.Text = $"{currentCount}/{totalCount}";
                 }
                 catch (Exception ex)
                 {

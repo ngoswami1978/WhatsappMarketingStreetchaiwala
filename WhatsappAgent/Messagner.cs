@@ -320,6 +320,11 @@ namespace WhatsappAgent
                     }
 
                 textbox.SendKeys(Keys.Enter);
+
+
+                var textboxMessage = WaitForCSSElemnt("[aria-placeholder=\"Type a message\"]", load_timeout);
+                textbox.SendKeys(Keys.Enter);
+
                 TryDismissAlert();
 
                 WaitForLastMessage(ticks_timeout);

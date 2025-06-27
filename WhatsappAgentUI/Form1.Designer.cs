@@ -44,6 +44,7 @@
             button6 = new Button();
             checkBox1 = new CheckBox();
             button7 = new Button();
+            lblcount = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -130,6 +131,7 @@
             // button5
             // 
             button5.Enabled = false;
+            button5.ForeColor = Color.Red;
             button5.Location = new Point(14, 80);
             button5.Margin = new Padding(3, 4, 3, 4);
             button5.Name = "button5";
@@ -179,6 +181,7 @@
             // 
             // button6
             // 
+            button6.ForeColor = SystemColors.HotTrack;
             button6.Location = new Point(14, 49);
             button6.Margin = new Padding(3, 4, 3, 4);
             button6.Name = "button6";
@@ -212,11 +215,20 @@
             button7.UseVisualStyleBackColor = true;
             button7.Click += button7_Click;
             // 
+            // lblcount
+            // 
+            lblcount.AutoSize = true;
+            lblcount.Location = new Point(848, 12);
+            lblcount.Name = "lblcount";
+            lblcount.Size = new Size(0, 20);
+            lblcount.TabIndex = 14;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1035, 707);
+            Controls.Add(lblcount);
             Controls.Add(button7);
             Controls.Add(pictureBox1);
             Controls.Add(checkBox1);
@@ -237,7 +249,7 @@
             MinimizeBox = false;
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "WhatsappAgent";
+            Text = "Whatsapp campaign";
             FormClosing += Form1_FormClosing;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
@@ -261,5 +273,6 @@
         private Button button6;
         private CheckBox checkBox1;
         private Button button7;
+        private Label lblcount;
     }
 }
