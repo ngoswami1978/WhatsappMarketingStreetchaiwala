@@ -36,6 +36,7 @@
             button4 = new Button();
             pictureBox1 = new PictureBox();
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            backgroundWorkerSending = new System.ComponentModel.BackgroundWorker();
             button5 = new Button();
             textmsg = new TextBox();
             label1 = new Label();
@@ -45,6 +46,7 @@
             checkBox1 = new CheckBox();
             button7 = new Button();
             lblcount = new Label();
+            
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -265,6 +267,8 @@
         private Button button4;
         private PictureBox pictureBox1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerSending;
+
         private Button button5;
         private TextBox textmsg;
         private Label label1;
@@ -273,6 +277,6 @@
         private Button button6;
         private CheckBox checkBox1;
         private Button button7;
-        private Label lblcount;
+        private Label lblcount;        
     }
 }

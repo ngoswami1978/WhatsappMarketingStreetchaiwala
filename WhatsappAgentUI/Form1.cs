@@ -292,6 +292,31 @@ namespace WhatsappAgentUI
                 button7.Enabled = true;
             }
         }
+        private void backgroundWorkerSending_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Messegner?.Login();
+        }
+
+        private void backgroundWorkerSending_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                textBox1.AppendLine($"[ERROR] Login failed: {e.Error.Message}");
+                button5.Enabled = true; // Re-enable login on failure
+                Messegner?.Dispose();
+            }
+            else
+            {
+                textBox1.AppendLine("[STATUS] Login successful!");
+                pictureBox1.Image = null; // Clear QR code
+                button1.Enabled = true;
+                button2.Enabled = true;
+                button3.Enabled = true;
+                button4.Enabled = true;
+                button7.Enabled = true;
+            }
+        }
+
 
         // --- Background Worker Logic for Sending Campaign ---
         private void StartSendingCampaign()
@@ -323,9 +348,12 @@ namespace WhatsappAgentUI
             int totalCount = contactsToSend.Count;
             int successfulSends = 0;
             int failedSends = 0;
+            
+
 
             for (int i = 0; i < totalCount; i++)
             {
+
                 if (backgroundWorkerSending.CancellationPending)
                 {
                     e.Cancel = true;
@@ -335,7 +363,7 @@ namespace WhatsappAgentUI
                 Contact contact = contactsToSend[i];
                 string logMessage = $"[PROCESS] ({i + 1}/{totalCount}) Sending to {contact.ContactNumber}...";
                 backgroundWorkerSending.ReportProgress((int)(((double)(i + 1) / totalCount) * 100), logMessage);
-
+                int progress = (int)(((double)(i + 1) / totalCount) * 100);
                 try
                 {
                     if (string.IsNullOrEmpty(contact.ContactNumber)) throw new ArgumentException("Contact number is empty.");
@@ -354,17 +382,17 @@ namespace WhatsappAgentUI
                     }
 
                     successfulSends++;
-                    backgroundWorkerSending.ReportProgress(e.ProgressPercentage, $"[SUCCESS] Sent to {contact.ContactNumber}.");
+                    backgroundWorkerSending.ReportProgress(progress, $"[SUCCESS] Sent to {contact.ContactNumber}.");
                 }
                 catch (Exception ex)
                 {
                     failedSends++;
-                    backgroundWorkerSending.ReportProgress(e.ProgressPercentage, $"[FAILURE] Failed for {contact.ContactNumber}: {ex.Message.Split('\n').FirstOrDefault()}");
+                    backgroundWorkerSending.ReportProgress(progress, $"[FAILURE] Failed for {contact.ContactNumber}: {ex.Message.Split('\n').FirstOrDefault()}");
                 }
 
                 // Use the randomized wait from the Messegner class
                 Messegner?.Wait(8, 20); // Random wait between 8 and 20 seconds
-            }
+}
 
             e.Result = new Tuple<int, int>(successfulSends, failedSends);
         }

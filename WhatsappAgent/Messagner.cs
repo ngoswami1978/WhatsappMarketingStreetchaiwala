@@ -13,7 +13,8 @@ using System.Web;
 using TextCopy;
 using static System.Net.Mime.MediaTypeNames;
 using Image = System.Drawing.Image;
-using System.Threading; // Added for Thread.Sleep in the new Wait method
+using System.Threading;
+using System.Collections.Generic; // Added for Thread.Sleep in the new Wait method
 
 namespace WhatsappAgent
 {
@@ -227,7 +228,7 @@ namespace WhatsappAgent
         /// </summary>
         /// <param name="minSeconds">The minimum number of seconds to wait.</param>
         /// <param name="maxSeconds">The maximum number of seconds to wait.</param>
-        private void Wait(int minSeconds, int maxSeconds)
+        public void Wait(int minSeconds, int maxSeconds)
         {
             Random random = new Random();
             int randomDelayInSeconds = random.Next(minSeconds, maxSeconds + 1); // +1 because Next is exclusive on upper bound
@@ -319,10 +320,12 @@ namespace WhatsappAgent
                 var url = $"https://web.whatsapp.com/send?phone={number}&text={HttpUtility.UrlEncode(message)}&type=phone_number&app_absent=0";
                 driver.Navigate().GoToUrl(url);
                 Console.WriteLine($"[INFO] Navigating to chat with number: {number}");
-                                
+
                 // Wait for the message input box using a more stable selector
                 // [data-testid="compose-input"] is a common alternative. Verify this in browser dev tools.
-                var textbox = WaitForCSSElemnt("[data-testid=\"compose-input\"]", load_timeout); // Replaced original line and duplicate
+                //var textbox = WaitForCSSElemnt("[data-testid=\"compose-input\"]", load_timeout); // Replaced original line and duplicate
+                var textbox = WaitForCSSElemnt("[aria-placeholder=\"Type a message\"]", load_timeout);
+
 
                 // --- SUGGESTION: ADD ROBUST NULL CHECK HERE ---
                 if (textbox == null)
@@ -337,7 +340,7 @@ namespace WhatsappAgent
                 var lines = message.Split('\n');
                 for (int i = 0; i < lines.Length; i++)
                 {
-                    textbox.SendKeys(lines[i]);
+                    //textbox.SendKeys(lines[i]);
                     if (i < lines.Length - 1) // If not the last line, add Shift+Enter for a new line within the message
                     {
                         new Actions(driver).KeyDown(Keys.Shift).SendKeys(Keys.Enter).KeyUp(Keys.Shift).Perform();
@@ -398,7 +401,7 @@ namespace WhatsappAgent
 
                 // Wait for the message input box (as an indicator of chat readiness)
                 // Use a more stable selector
-                var messageInputCheck = WaitForCSSElemnt("[data-testid=\"compose-input\"]", load_timeout);
+                var messageInputCheck = WaitForCSSElemnt("[aria-placeholder=\"Type a message\"]", load_timeout); ;
                 if (messageInputCheck == null)
                 {
                     Console.WriteLine($"[ERROR] Message input element not found for {number}. Cannot proceed with media sending.");
@@ -418,7 +421,9 @@ namespace WhatsappAgent
 
                 // Locate the file input element based on media type
                 // input[accept*='image'] for images/videos, input[accept='*'] for any file (document)
-                var fileinput = WaitForCSSElemnt($"{(mediaType == MediaType.IMAGE_OR_VIDEO ? "input[accept*='image'], input[accept*='video']" : "input[accept='*'][type='file']"), 5}"); // Added type='file' for robustness, and explicit 5s timeout
+                //var fileinput = WaitForCSSElemntImg($"{(mediaType == MediaType.IMAGE_OR_VIDEO ? "input[accept*='image'], input[accept*='video']" : "input[accept='*'][type='file']"), 5}"); // Added type='file' for robustness, and explicit 5s timeout
+
+                var fileinput = WaitForCSSElemntImg($"{(mediaType == MediaType.IMAGE_OR_VIDEO ? "input[accept*='image']" : "input[accept='*']")}");
                 if (fileinput == null)
                 {
                     Console.WriteLine($"[ERROR] File input element for {mediaType} not found.");
@@ -429,7 +434,7 @@ namespace WhatsappAgent
 
                 // Wait for the send button to appear and become clickable after file selection
                 // [data-testid="send"] is a common alternative for send button after file selection
-                var sendButton = WaitForCSSElemnt("[data-testid=\"send\"]", 20); // Give more time for large files to process
+                var sendButton = WaitForCSSElemnt("div[aria-label='Send'][role='button']");  // Give more time for large files to process
                 if (sendButton == null)
                 {
                     Console.WriteLine("[ERROR] Send button after media selection not found.");
@@ -538,6 +543,19 @@ namespace WhatsappAgent
                 throw; // Re-throw to inform calling method
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        //private IWebElement WaitForCSSElemntImg(string selector, uint timeout = 3)
+        //{
+        //    new WebDriverWait(driver, TimeSpan.FromSeconds(timeout)).Until(x => !CheckWindowState(false) || x.FindElements(By.CssSelector(selector)).Count > 0);
+        //    CheckWindowState();
+        //    return driver.FindElement(By.CssSelector(selector));
+        //}
 
         /// <summary>
         /// Waits for a CSS element to be present and displayed.
