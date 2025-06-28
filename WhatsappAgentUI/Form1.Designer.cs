@@ -243,7 +243,10 @@
             // lblcount
             // 
             lblcount.AutoSize = true;
-            lblcount.Location = new Point(954, 11);
+            lblcount.ForeColor = SystemColors.ButtonHighlight;
+            lblcount.Image = Properties.Resources.StreetChaiwalaLogos06;
+            lblcount.ImageAlign = ContentAlignment.TopCenter;
+            lblcount.Location = new Point(21, 187);
             lblcount.Margin = new Padding(4, 0, 4, 0);
             lblcount.Name = "lblcount";
             lblcount.Size = new Size(0, 18);
