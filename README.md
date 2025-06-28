@@ -1,43 +1,110 @@
-# WhatsappAgent
-This is a Whatsapp message sending automation library using Selenium framework, based on the Whatsapp web app.
-# Usage
+Here’s a detailed and professional-style **`README.md`** content for your GitHub project named **WhatsAppAgent - Street Chai Wala**, tailored for campaign automation:
+
+---
+
+# 📲 WhatsAppAgent – Street Chai Wala 🍕
+
+An intelligent desktop tool to automate **offer campaigns** for Street Chai Wala using **WhatsApp messaging**. Whether you're sending text offers, images, or media attachments, this tool simplifies customer engagement directly from your system.
+
+---
+
+## 🚀 Project Overview
+
+The **WhatsAppAgent** is a .NET-based Windows application designed to streamline marketing campaigns for small and local businesses through WhatsApp Web. It helps send **bulk offers**, **images**, and **attachments** with ease by reading customer contact lists from a file.
+
+This tool is tailored for **Street Chai Wala** but can be reused and extended for other businesses with similar needs.
+
+---
+
+## 🔧 Features
+
+* ✅ One-click startup and driver initialization
+* 📤 Upload contact file (.txt format) for bulk messaging
+* 💬 Send plain **text message campaigns**
+* 🖼️ Send **image or media-based offers**
+* 📎 Send **attachments** to customer WhatsApp numbers
+* 🔁 Live logging of message delivery status
+* 🛑 Robust error handling during driver or message failure
+
+---
+
+## 🧩 Getting Started
+
+Follow these steps to run your WhatsAppAgent successfully:
+
+### 1. Start the Driver
+
+Click the **“Start Driver”** button.
+This will launch and initialize the browser driver necessary to interact with WhatsApp Web.
+
+### 2. Login to WhatsApp
+
+Click the **“Login”** button.
+You will be prompted to scan the QR code in the browser window. Ensure your phone is connected to the internet.
+
+> The login becomes active once your system connects with the initialized driver.
+
+### 3. Upload Contact List
+
+Click **“Add Contact File”** and select your `.txt` file.
+Each line of this text file must contain a valid customer WhatsApp number (without country code formatting symbols like `+` or `-`).
+
+Example `contacts.txt`:
+
 ```
-using WhatsappAgent;
-
-// Initialize driver and start browser (you can hide or show browser window)
-Messegner Messegner = new Messegner(hideWindow: false);
-
-
-void Messegner_OnQRReady(System.Drawing.Image qrbmp)
-{
-    // This is helpfull when 'hideWindow' option is set to true
-    Console.WriteLine("Login QR code has been recieved as image, you can save it to disk or show it somewhere for the user so the user can scan it to continue login.");
-}
-
-void Messegner_OnDisposed()
-{
-    Console.WriteLine("Messenger has been disposed, you can't use it anymore.");
-}
-
-Messegner.OnDisposed += Messegner_OnDisposed;
-Messegner.OnQRReady += Messegner_OnQRReady;
-
-// Open web.whatsapp.com and try to login
-Messegner.Login();
-
-// Send text message
-Messegner.SendMessage("70434962", "This is a text message");
-
-// Send image or video
-Messegner.SendMedia(MediaType.IMAGE_OR_VIDEO, "70434962", "C:\\Users\\96170\\Desktop\\WhatsApp Image 2022-11-28 at 19.20.48.jpg", "this is an image with caption");
-
-// Send attachment without caption
-Messegner.SendMedia(MediaType.ATTACHMENT, "70434962", "C:\\Users\\96170\\Desktop\\WhatsApp Image 2022-11-28 at 19.20.48.jpg", "");
-
-// Logout from whatsapp and dispose the Messenger object
-Messegner.Logout();
-
+919876543210
+918888777666
+919595959595
 ```
 
-# Support
-Please consider supporting my work [patreon](https://patreon.com/user?u=67136083&utm_medium=clipboard_copy&utm_source=copyLink&utm_campaign=creatorshare_creator&utm_content=join_link)
+### 4. Send Campaign Message
+
+In the **message text box**, type your offer (e.g., "Buy 1 Get 1 Free Pizza today!")
+Then click **“Send Message Offer”** to begin sending text messages to the uploaded contact list.
+
+### 5. Send Image / Media Campaign
+
+To send media offers:
+
+* Click **“Send Offer As Image”** and select an image (`.jpg`, `.png`, etc.).
+* You may also click **“Send Attachment”** to send documents or other media.
+
+---
+
+## 📁 Project Structure
+
+```bash
+WhatsAppAgent-StreetChaiWala/
+│
+├── /bin/
+├── /obj/
+├── MainForm.cs           # Main application window and UI logic
+├── Messenger.cs          # WhatsApp interaction logic
+├── Program.cs            # Entry point
+├── contacts.txt          # Sample contact file
+├── README.md             # Project documentation
+└── resources/            # Images or assets used in campaign
+```
+
+---
+
+## 📝 Requirements
+
+* .NET Framework 4.6 or higher
+* Chromium Driver or Selenium WebDriver (included in the driver startup)
+* WhatsApp Web (requires active phone connection)
+
+---
+
+## 🛠️ Future Enhancements
+
+* Scheduled messaging support
+* Campaign reporting dashboard
+* Message templates with variable substitution (e.g., customer name)
+
+---
+
+## 📣 Credits
+
+Built by **Neeraj & Team – Street Chai Wala**
+For queries or improvements, please open an issue or contact us.
