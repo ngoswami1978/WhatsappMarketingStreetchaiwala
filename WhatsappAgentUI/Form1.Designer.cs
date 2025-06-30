@@ -36,6 +36,7 @@
             button4 = new Button();
             pictureBox1 = new PictureBox();
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            backgroundWorkerSending = new System.ComponentModel.BackgroundWorker();
             button5 = new Button();
             textmsg = new TextBox();
             label1 = new Label();
@@ -45,40 +46,49 @@
             checkBox1 = new CheckBox();
             button7 = new Button();
             lblcount = new Label();
+            statusStrip1 = new StatusStrip();
+            richTextBox1 = new RichTextBox();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // button1
             // 
+            button1.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             button1.Enabled = false;
-            button1.Location = new Point(631, 12);
-            button1.Margin = new Padding(3, 4, 3, 4);
+            button1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            button1.ForeColor = SystemColors.ButtonHighlight;
+            button1.Location = new Point(818, 11);
+            button1.Margin = new Padding(4);
             button1.Name = "button1";
-            button1.Size = new Size(186, 31);
+            button1.Size = new Size(334, 28);
             button1.TabIndex = 0;
-            button1.Text = "send text";
+            button1.Text = "Send Message Offer";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
             // button2
             // 
+            button2.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             button2.Enabled = false;
-            button2.Location = new Point(15, 230);
-            button2.Margin = new Padding(3, 4, 3, 4);
+            button2.ForeColor = SystemColors.ButtonHighlight;
+            button2.Location = new Point(17, 207);
+            button2.Margin = new Padding(4);
             button2.Name = "button2";
-            button2.Size = new Size(153, 31);
+            button2.Size = new Size(172, 28);
             button2.TabIndex = 1;
-            button2.Text = "send image";
+            button2.Text = "Send Offer as Image";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 
             // button3
             // 
+            button3.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             button3.Enabled = false;
-            button3.Location = new Point(14, 365);
-            button3.Margin = new Padding(3, 4, 3, 4);
+            button3.ForeColor = SystemColors.ButtonHighlight;
+            button3.Location = new Point(15, 328);
+            button3.Margin = new Padding(4);
             button3.Name = "button3";
-            button3.Size = new Size(153, 31);
+            button3.Size = new Size(172, 28);
             button3.TabIndex = 2;
             button3.Text = "logout";
             button3.UseVisualStyleBackColor = true;
@@ -89,22 +99,24 @@
             textBox1.BackColor = Color.White;
             textBox1.BorderStyle = BorderStyle.FixedSingle;
             textBox1.ForeColor = SystemColors.WindowText;
-            textBox1.Location = new Point(15, 412);
-            textBox1.Margin = new Padding(3, 4, 3, 4);
+            textBox1.Location = new Point(17, 371);
+            textBox1.Margin = new Padding(4);
             textBox1.Multiline = true;
             textBox1.Name = "textBox1";
             textBox1.ReadOnly = true;
             textBox1.ScrollBars = ScrollBars.Vertical;
-            textBox1.Size = new Size(484, 282);
+            textBox1.Size = new Size(545, 239);
             textBox1.TabIndex = 3;
             // 
             // button4
             // 
+            button4.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             button4.Enabled = false;
-            button4.Location = new Point(15, 261);
-            button4.Margin = new Padding(3, 4, 3, 4);
+            button4.ForeColor = SystemColors.ButtonHighlight;
+            button4.Location = new Point(17, 235);
+            button4.Margin = new Padding(4);
             button4.Name = "button4";
-            button4.Size = new Size(153, 31);
+            button4.Size = new Size(172, 28);
             button4.TabIndex = 4;
             button4.Text = "send attachment";
             button4.UseVisualStyleBackColor = true;
@@ -113,12 +125,13 @@
             // pictureBox1
             // 
             pictureBox1.BackColor = Color.White;
+            pictureBox1.BackgroundImageLayout = ImageLayout.Zoom;
             pictureBox1.BorderStyle = BorderStyle.FixedSingle;
-            pictureBox1.Location = new Point(174, 16);
-            pictureBox1.Margin = new Padding(3, 4, 3, 4);
+            pictureBox1.Location = new Point(195, 14);
+            pictureBox1.Margin = new Padding(4);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Padding = new Padding(11, 13, 11, 13);
-            pictureBox1.Size = new Size(325, 379);
+            pictureBox1.Padding = new Padding(13, 12, 13, 12);
+            pictureBox1.Size = new Size(366, 341);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.TabIndex = 5;
             pictureBox1.TabStop = false;
@@ -130,12 +143,13 @@
             // 
             // button5
             // 
+            button5.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             button5.Enabled = false;
-            button5.ForeColor = Color.Red;
-            button5.Location = new Point(14, 80);
-            button5.Margin = new Padding(3, 4, 3, 4);
+            button5.ForeColor = SystemColors.ButtonHighlight;
+            button5.Location = new Point(15, 72);
+            button5.Margin = new Padding(4);
             button5.Name = "button5";
-            button5.Size = new Size(153, 31);
+            button5.Size = new Size(172, 28);
             button5.TabIndex = 6;
             button5.Text = "login";
             button5.UseVisualStyleBackColor = true;
@@ -143,49 +157,55 @@
             // 
             // textmsg
             // 
-            textmsg.Location = new Point(505, 49);
-            textmsg.Margin = new Padding(3, 4, 3, 4);
+            textmsg.Location = new Point(568, 44);
+            textmsg.Margin = new Padding(4);
             textmsg.Multiline = true;
             textmsg.Name = "textmsg";
-            textmsg.Size = new Size(480, 645);
+            textmsg.Size = new Size(584, 161);
             textmsg.TabIndex = 7;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(524, 17);
+            label1.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            label1.ForeColor = SystemColors.ButtonHighlight;
+            label1.Image = Properties.Resources.StreetChaiwalaLogos06;
+            label1.Location = new Point(568, 15);
+            label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
-            label1.Size = new Size(101, 20);
+            label1.Size = new Size(223, 23);
             label1.TabIndex = 8;
-            label1.Text = "Text Message:";
+            label1.Text = "Type Offer Message below";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(31, 131);
+            label2.Location = new Point(35, 118);
+            label2.Margin = new Padding(4, 0, 4, 0);
             label2.Name = "label2";
-            label2.Size = new Size(120, 20);
+            label2.Size = new Size(127, 18);
             label2.TabIndex = 10;
             label2.Text = "Mobile Numbers";
             label2.Visible = false;
             // 
             // txtmobile
             // 
-            txtmobile.Location = new Point(31, 165);
-            txtmobile.Margin = new Padding(3, 4, 3, 4);
+            txtmobile.Location = new Point(35, 148);
+            txtmobile.Margin = new Padding(4);
             txtmobile.Name = "txtmobile";
-            txtmobile.Size = new Size(136, 27);
+            txtmobile.Size = new Size(153, 26);
             txtmobile.TabIndex = 9;
             txtmobile.Text = "70434962";
             txtmobile.Visible = false;
             // 
             // button6
             // 
-            button6.ForeColor = SystemColors.HotTrack;
-            button6.Location = new Point(14, 49);
-            button6.Margin = new Padding(3, 4, 3, 4);
+            button6.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
+            button6.ForeColor = SystemColors.ButtonHighlight;
+            button6.Location = new Point(15, 44);
+            button6.Margin = new Padding(4);
             button6.Name = "button6";
-            button6.Size = new Size(153, 31);
+            button6.Size = new Size(172, 28);
             button6.TabIndex = 11;
             button6.Text = "Start Driver";
             button6.UseVisualStyleBackColor = true;
@@ -194,40 +214,71 @@
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.Location = new Point(14, 16);
-            checkBox1.Margin = new Padding(3, 4, 3, 4);
+            checkBox1.BackColor = SystemColors.ActiveBorder;
+            checkBox1.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
+            checkBox1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            checkBox1.ForeColor = SystemColors.ButtonHighlight;
+            checkBox1.Location = new Point(15, 14);
+            checkBox1.Margin = new Padding(4);
             checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(179, 24);
+            checkBox1.Size = new Size(125, 24);
             checkBox1.TabIndex = 12;
-            checkBox1.Text = "Hide Browser Window";
-            checkBox1.UseVisualStyleBackColor = true;
+            checkBox1.Text = "Hide Browser";
+            checkBox1.UseVisualStyleBackColor = false;
             // 
             // button7
             // 
+            button7.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             button7.Enabled = false;
             button7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            button7.Location = new Point(15, 131);
-            button7.Margin = new Padding(3, 4, 3, 4);
+            button7.ForeColor = SystemColors.ButtonHighlight;
+            button7.Location = new Point(17, 118);
+            button7.Margin = new Padding(4);
             button7.Name = "button7";
-            button7.Size = new Size(153, 72);
+            button7.Size = new Size(172, 65);
             button7.TabIndex = 13;
-            button7.Text = "Upload Contact File";
+            button7.Text = "Add Customer List";
             button7.UseVisualStyleBackColor = true;
             button7.Click += button7_Click;
             // 
             // lblcount
             // 
             lblcount.AutoSize = true;
-            lblcount.Location = new Point(848, 12);
+            lblcount.ForeColor = SystemColors.ButtonHighlight;
+            lblcount.Image = Properties.Resources.StreetChaiwalaLogos06;
+            lblcount.ImageAlign = ContentAlignment.TopCenter;
+            lblcount.Location = new Point(21, 187);
+            lblcount.Margin = new Padding(4, 0, 4, 0);
             lblcount.Name = "lblcount";
-            lblcount.Size = new Size(0, 20);
+            lblcount.Size = new Size(0, 18);
             lblcount.TabIndex = 14;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.ImageScalingSize = new Size(20, 20);
+            statusStrip1.Location = new Point(0, 614);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(1165, 22);
+            statusStrip1.TabIndex = 16;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // richTextBox1
+            // 
+            richTextBox1.Location = new Point(569, 212);
+            richTextBox1.Name = "richTextBox1";
+            richTextBox1.Size = new Size(583, 398);
+            richTextBox1.TabIndex = 17;
+            richTextBox1.Text = "";
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(9F, 18F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1035, 707);
+            BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
+            BackgroundImageLayout = ImageLayout.Stretch;
+            ClientSize = new Size(1165, 636);
+            Controls.Add(richTextBox1);
+            Controls.Add(statusStrip1);
             Controls.Add(lblcount);
             Controls.Add(button7);
             Controls.Add(pictureBox1);
@@ -243,13 +294,14 @@
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
+            Font = new Font("Verdana", 9F, FontStyle.Regular, GraphicsUnit.Point);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(3, 4, 3, 4);
+            Margin = new Padding(4);
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Whatsapp campaign";
+            Text = "STREET CHAI WALA  WHATSAPP CAMPAIGN";
             FormClosing += Form1_FormClosing;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
@@ -265,6 +317,8 @@
         private Button button4;
         private PictureBox pictureBox1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerSending;
+
         private Button button5;
         private TextBox textmsg;
         private Label label1;
@@ -274,5 +328,7 @@
         private CheckBox checkBox1;
         private Button button7;
         private Label lblcount;
+        private StatusStrip statusStrip1;
+        private RichTextBox richTextBox1;
     }
 }

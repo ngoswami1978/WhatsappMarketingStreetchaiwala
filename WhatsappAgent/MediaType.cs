@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WhatsappAgent
 {
-    public enum MediaType
+    public enum MediaType_
     {
         IMAGE_OR_VIDEO=0,
         ATTACHMENT=1
