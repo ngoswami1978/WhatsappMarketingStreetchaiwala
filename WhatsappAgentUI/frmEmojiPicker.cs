@@ -32,7 +32,6 @@ namespace WhatsappAgentUI
             {
                 var panelName = "flp" + category.Key;
                 var panel = this.tabControlEmojis.Controls.Find(panelName, true).FirstOrDefault() as FlowLayoutPanel;
-
                 if (panel != null)
                 {
                     foreach (var emoji in category.Value)

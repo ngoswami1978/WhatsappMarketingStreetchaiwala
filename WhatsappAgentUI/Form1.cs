@@ -22,21 +22,16 @@ namespace WhatsappAgentUI
             InitializeComponent();
         }
 
-        #region New Emoji Button Logic
-        // This is the NEW logic for the main Emoji button (the one with 😀 on it)
+        #region New Button Logic (Bold, Italic, Underline, Emoji)
+        
         private void btnEmoji_Click(object sender, EventArgs e)
         {
-            // Create an instance of our new popup form
             using (frmEmojiPicker emojiForm = new frmEmojiPicker())
             {
-                // Calculate where to show the popup: right below the emoji button
                 Point screenPoint = btnEmoji.PointToScreen(new Point(0, btnEmoji.Height));
                 emojiForm.Location = screenPoint;
-
-                // Show the form as a dialog and wait for the user to pick an emoji
                 if (emojiForm.ShowDialog(this) == DialogResult.OK)
                 {
-                    // If the user clicked an emoji, insert it into the RichTextBox
                     if (!string.IsNullOrEmpty(emojiForm.SelectedEmoji))
                     {
                         textmsg.Focus();
@@ -45,10 +40,37 @@ namespace WhatsappAgentUI
                 }
             }
         }
+        
+        private void btnBold_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont;
+            FontStyle newStyle;
+            if (textmsg.SelectionFont.Bold) { newStyle = currentFont.Style & ~FontStyle.Bold; } else { newStyle = currentFont.Style | FontStyle.Bold; }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        private void btnItalic_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont;
+            FontStyle newStyle;
+            if (textmsg.SelectionFont.Italic) { newStyle = currentFont.Style & ~FontStyle.Italic; } else { newStyle = currentFont.Style | FontStyle.Italic; }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        private void btnUnderline_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont;
+            FontStyle newStyle;
+            if (textmsg.SelectionFont.Underline) { newStyle = currentFont.Style & ~FontStyle.Underline; } else { newStyle = currentFont.Style | FontStyle.Underline; }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
         #endregion
 
-        #region Existing Code (Unchanged)
-
+        #region Existing Code
         private void Messegner_OnQRReady(Image qrbmp)
         {
             pictureBox1.Image = qrbmp;
@@ -90,33 +112,6 @@ namespace WhatsappAgentUI
             if (rtb.SelectionFont.Strikeout) result.Append(strikeChar);
             rtb.Select(0, 0);
             return result.ToString();
-        }
-
-        private void btnBold_Click(object sender, EventArgs e)
-        {
-            textmsg.Focus();
-            Font currentFont = textmsg.SelectionFont;
-            FontStyle newStyle;
-            if (textmsg.SelectionFont.Bold) { newStyle = currentFont.Style & ~FontStyle.Bold; } else { newStyle = currentFont.Style | FontStyle.Bold; }
-            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
-        }
-
-        private void btnItalic_Click(object sender, EventArgs e)
-        {
-            textmsg.Focus();
-            Font currentFont = textmsg.SelectionFont;
-            FontStyle newStyle;
-            if (textmsg.SelectionFont.Italic) { newStyle = currentFont.Style & ~FontStyle.Italic; } else { newStyle = currentFont.Style | FontStyle.Italic; }
-            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
-        }
-
-        private void btnUnderline_Click(object sender, EventArgs e)
-        {
-            textmsg.Focus();
-            Font currentFont = textmsg.SelectionFont;
-            FontStyle newStyle;
-            if (textmsg.SelectionFont.Underline) { newStyle = currentFont.Style & ~FontStyle.Underline; } else { newStyle = currentFont.Style | FontStyle.Underline; }
-            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
         }
 
         private void button1_Click(object sender, EventArgs e)

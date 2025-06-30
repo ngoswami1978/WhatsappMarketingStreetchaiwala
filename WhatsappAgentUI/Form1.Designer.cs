@@ -37,10 +37,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.button5 = new System.Windows.Forms.Button();
-            
-            // MODIFIED: This is now a RichTextBox
             this.textmsg = new System.Windows.Forms.RichTextBox();
-            
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.txtmobile = new System.Windows.Forms.TextBox();
@@ -48,13 +45,11 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button7 = new System.Windows.Forms.Button();
             this.lblcount = new System.Windows.Forms.Label();
-            
-            // --- NEW BUTTONS DECLARED ---
             this.btnBold = new System.Windows.Forms.Button();
             this.btnItalic = new System.Windows.Forms.Button();
             this.btnUnderline = new System.Windows.Forms.Button();
-            // -----------------------------
-            
+            // === NEW EMOJI BUTTON IS CREATED HERE ===
+            this.btnEmoji = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -153,7 +148,6 @@
             // 
             // textmsg
             // 
-            // MODIFIED: This is now a RichTextBox with updated location and size
             this.textmsg.Location = new System.Drawing.Point(505, 80);
             this.textmsg.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.textmsg.Name = "textmsg";
@@ -216,7 +210,7 @@
             // button7
             // 
             this.button7.Enabled = false;
-            this.button7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.button7.Location = new System.Drawing.Point(15, 131);
             this.button7.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button7.Name = "button7";
@@ -236,7 +230,7 @@
             // 
             // btnBold
             // 
-            this.btnBold.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBold.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.btnBold.Location = new System.Drawing.Point(505, 45);
             this.btnBold.Name = "btnBold";
             this.btnBold.Size = new System.Drawing.Size(32, 29);
@@ -247,7 +241,7 @@
             // 
             // btnItalic
             // 
-            this.btnItalic.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnItalic.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
             this.btnItalic.Location = new System.Drawing.Point(543, 45);
             this.btnItalic.Name = "btnItalic";
             this.btnItalic.Size = new System.Drawing.Size(32, 29);
@@ -258,7 +252,7 @@
             // 
             // btnUnderline
             // 
-            this.btnUnderline.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnUnderline.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline);
             this.btnUnderline.Location = new System.Drawing.Point(581, 45);
             this.btnUnderline.Name = "btnUnderline";
             this.btnUnderline.Size = new System.Drawing.Size(32, 29);
@@ -267,18 +261,26 @@
             this.btnUnderline.UseVisualStyleBackColor = true;
             this.btnUnderline.Click += new System.EventHandler(this.btnUnderline_Click);
             // 
+            // btnEmoji
+            // 
+            this.btnEmoji.Font = new System.Drawing.Font("Segoe UI Emoji", 9F);
+            this.btnEmoji.Location = new System.Drawing.Point(619, 45);
+            this.btnEmoji.Name = "btnEmoji";
+            this.btnEmoji.Size = new System.Drawing.Size(32, 29);
+            this.btnEmoji.TabIndex = 18;
+            this.btnEmoji.Text = "😀";
+            this.btnEmoji.UseVisualStyleBackColor = true;
+            this.btnEmoji.Click += new System.EventHandler(this.btnEmoji_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1035, 707);
-            
-            // --- ADDED NEW CONTROLS TO THE FORM ---
+            this.Controls.Add(this.btnEmoji);
             this.Controls.Add(this.btnUnderline);
             this.Controls.Add(this.btnItalic);
             this.Controls.Add(this.btnBold);
-            // ------------------------------------
-            
             this.Controls.Add(this.lblcount);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.pictureBox1);
@@ -317,10 +319,7 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Button button5;
-        
-        // MODIFIED: This is now a RichTextBox
         private System.Windows.Forms.RichTextBox textmsg;
-
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtmobile;
@@ -328,11 +327,10 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Label lblcount;
-
-        // --- NEW BUTTONS DECLARED ---
         private System.Windows.Forms.Button btnBold;
         private System.Windows.Forms.Button btnItalic;
         private System.Windows.Forms.Button btnUnderline;
-        // -----------------------------
+        // === DECLARATION FOR THE NEW EMOJI BUTTON ===
+        private System.Windows.Forms.Button btnEmoji;
     }
 }
