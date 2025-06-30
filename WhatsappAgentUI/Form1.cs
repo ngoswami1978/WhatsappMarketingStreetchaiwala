@@ -181,7 +181,7 @@ namespace WhatsappAgentUI
         {
             try
             {
-                KillChromiumProcesses();
+                //KillChromiumProcesses();
                 checkBox1.Enabled = false;
                 button6.Enabled = false;
                 textBox1.AppendLine("[INIT] Starting browser driver...");
@@ -477,7 +477,7 @@ namespace WhatsappAgentUI
                 backgroundWorkerSending.CancelAsync();
             }
             Messegner?.Dispose();
-            KillChromiumProcesses(); // Final cleanup
+            //KillChromiumProcesses(); // Final cleanup
         }
     }
 }

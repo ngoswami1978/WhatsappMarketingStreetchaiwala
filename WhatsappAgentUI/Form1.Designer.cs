@@ -47,6 +47,7 @@
             button7 = new Button();
             lblcount = new Label();
             statusStrip1 = new StatusStrip();
+            richTextBox1 = new RichTextBox();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -160,7 +161,7 @@
             textmsg.Margin = new Padding(4);
             textmsg.Multiline = true;
             textmsg.Name = "textmsg";
-            textmsg.Size = new Size(584, 566);
+            textmsg.Size = new Size(584, 161);
             textmsg.TabIndex = 7;
             // 
             // label1
@@ -261,6 +262,14 @@
             statusStrip1.TabIndex = 16;
             statusStrip1.Text = "statusStrip1";
             // 
+            // richTextBox1
+            // 
+            richTextBox1.Location = new Point(569, 212);
+            richTextBox1.Name = "richTextBox1";
+            richTextBox1.Size = new Size(583, 398);
+            richTextBox1.TabIndex = 17;
+            richTextBox1.Text = "";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(9F, 18F);
@@ -268,6 +277,7 @@
             BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1165, 636);
+            Controls.Add(richTextBox1);
             Controls.Add(statusStrip1);
             Controls.Add(lblcount);
             Controls.Add(button7);
@@ -319,5 +329,6 @@
         private Button button7;
         private Label lblcount;
         private StatusStrip statusStrip1;
+        private RichTextBox richTextBox1;
     }
 }
