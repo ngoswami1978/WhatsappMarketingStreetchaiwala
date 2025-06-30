@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq; // Added for LINQ operations
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using WhatsappAgent;
 using WhatsappAgentUI.Model;
-
 
 namespace WhatsappAgentUI
 {
@@ -21,66 +20,32 @@ namespace WhatsappAgentUI
         public Form1()
         {
             InitializeComponent();
-            // --- NEW --- Call the method to create our categorized emoji buttons
-            PopulateEmojiPicker();
         }
 
-        #region New Categorized Emoji Functionality
-        /// <summary>
-        /// Populates a categorized TabControl with clickable emoji buttons.
-        /// </summary>
-        private void PopulateEmojiPicker()
+        #region New Emoji Button Logic
+        // This is the NEW logic for the main Emoji button (the one with 😀 on it)
+        private void btnEmoji_Click(object sender, EventArgs e)
         {
-            // A dictionary where the Key is the category name and the Value is a list of emojis
-            var emojiCategories = new Dictionary<string, List<string>>
+            // Create an instance of our new popup form
+            using (frmEmojiPicker emojiForm = new frmEmojiPicker())
             {
-                ["Smileys"] = new List<string> { "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊", "😋", "😎", "😍", "😘", "🥰", "😗", "😙", "😚", "🙂", "🤗", "🤩", "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", "😮", "🤐", "😯", "😪", "😫", "🥱", "😴", "🤤", "😒", "🥴", "😵", "🤯", "🤠", "🥳", "🥺", "😭", "😱", "🤪", "😇", "🥳", "👋", "👍", "👎", "👌", "🙏", "❤️" },
-                ["Animals"] = new List<string> { "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦆", "🦅", "🦉", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", "🐌", "🐞", "🐜", "🦟", "🦗", "🕷️", "🐢", "🐍", "🦎", "🦖", "🦕", "🐙", "🦑", "🦐", "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈" },
-                ["Food"] = new List<string> { "🍏", "🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🍈", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑", "🥦", "🥬", "🥒", "🌶️", "🌽", "🥕", "🧄", "🧅", "🥔", "🍠", "🥐", "🥯", "🍞", "🥖", "🥨", "🧀", "🥚", "🍳", "🧈", "🥞", "🧇", "🥓", "🥩", "🍗", "🍖", "🦴", "🌭", "🍔", "🍟", "🍕" },
-                ["Objects"] = new List<string> { "⌚", "📱", "💻", "⌨️", "🖥️", "🖨️", "🖱️", "💾", "💿", "📀", "📼", "📷", "📸", "📹", "📞", "☎️", "📟", "📠", "📺", "📻", "💡", "🔦", "🔋", "🔌", "💰", "💵", "💴", "💶", "💷", "💳", "💎", "⚖️", "🔧", "🔨", "⚒️", "🛠️", "⛏️", "🔩", "⚙️", "🧱", "⛓️", "🧰", "🧲", "🔫", "💣", "🔪", "🗡️", "🛡️", "🚬", "⚰️", "⚱️", "🏺", "🔮", "📿", "💈", "⚗️", "🔭", "🔬", "💊", "💉", "🩸" },
-                ["Symbols"] = new List<string> { "☮️", "✝️", "☪️", "🕉️", "☸️", "✡️", "🔯", "🕎", "☯️", "☦️", "🛐", "⛎", "♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓", "⚛️", "☢️", "☣️", "️", "❤️‍🔥", "❤️‍🩹", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "💌", "💤", "💢", "💥", "💦", "💨", "💫", "💬", "💭", "🌀", "✅", "✔️", "☑️", "🔘", "🔗", "✖️", "❌", "❎", "➕", "➖", "➗", "➰", "➿", "⤴️", "⤵️", "⬅️", "⬆️", "⬇️", "➡️" }
-            };
+                // Calculate where to show the popup: right below the emoji button
+                Point screenPoint = btnEmoji.PointToScreen(new Point(0, btnEmoji.Height));
+                emojiForm.Location = screenPoint;
 
-            foreach (var category in emojiCategories)
-            {
-                // Find the FlowLayoutPanel that matches the category name (e.g., "flp" + "Smileys")
-                var panelName = "flp" + category.Key;
-                var panel = this.Controls.Find(panelName, true).FirstOrDefault() as FlowLayoutPanel;
-
-                if (panel != null)
+                // Show the form as a dialog and wait for the user to pick an emoji
+                if (emojiForm.ShowDialog(this) == DialogResult.OK)
                 {
-                    foreach (var emoji in category.Value)
+                    // If the user clicked an emoji, insert it into the RichTextBox
+                    if (!string.IsNullOrEmpty(emojiForm.SelectedEmoji))
                     {
-                        var emojiButton = new Button();
-                        emojiButton.Text = emoji;
-                        emojiButton.Font = new Font("Segoe UI Emoji", 12);
-                        emojiButton.Size = new Size(40, 40);
-                        emojiButton.Margin = new Padding(2);
-                        emojiButton.Cursor = Cursors.Hand;
-                        emojiButton.Click += (sender, args) =>
-                        {
-                            textmsg.Focus();
-                            textmsg.SelectedText = emoji;
-                        };
-                        panel.Controls.Add(emojiButton);
+                        textmsg.Focus();
+                        textmsg.SelectedText = emojiForm.SelectedEmoji;
                     }
                 }
             }
         }
-
-        // Event handler for the main Emoji button (the one with 😀 on it)
-        // Ensure you have connected this in the designer!
-        private void btnEmoji_Click(object sender, EventArgs e)
-        {
-            // Toggle the visibility of the emoji TabControl
-            tabControlEmojis.Visible = !tabControlEmojis.Visible;
-            if (tabControlEmojis.Visible)
-            {
-                tabControlEmojis.BringToFront(); // Ensure it appears on top of other controls
-            }
-        }
         #endregion
-
 
         #region Existing Code (Unchanged)
 
