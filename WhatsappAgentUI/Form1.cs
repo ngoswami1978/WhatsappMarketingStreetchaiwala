@@ -1,9 +1,9 @@
-﻿using System; // Added for EventArgs
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing; // Added for Image
-using System.IO; // Added for File
-using System.Text; // Added for StringBuilder
+using System.Drawing; // Added for Font, FontStyle, and Image
+using System.IO;    // Added for File operations
+using System.Text;  // Added for StringBuilder
 using System.Threading; // Added for Thread
 using System.Windows.Forms;
 using WhatsappAgent;
@@ -28,65 +28,13 @@ namespace WhatsappAgentUI
             textBox1.Invoke(() => textBox1.AppendLine("please scan the QR code using your Whatsapp mobile app to continue login."));
         }
 
-        // =================================================================================
-        // NEW HELPER FUNCTION TO SUPPORT RICHTEXTBOX
-        // =================================================================================
-        /// <summary>
-        /// Converts RichTextBox formatting (Bold, Italic, Strikethrough) to WhatsApp's markdown.
-        /// </summary>
-        private string ConvertRtfToWhatsAppFormat(RichTextBox rtb)
-        {
-            if (string.IsNullOrEmpty(rtb.Text)) return string.Empty;
-
-            var result = new StringBuilder();
-            const char boldChar = '*';
-            const char italicChar = '_';
-            const char strikeChar = '~';
-
-            for (int i = 0; i < rtb.Text.Length; i++)
-            {
-                rtb.Select(i, 1);
-                bool isBold = rtb.SelectionFont.Bold;
-                bool isItalic = rtb.SelectionFont.Italic;
-                bool isStrikethrough = rtb.SelectionFont.Strikeout;
-
-                bool wasBold = false, wasItalic = false, wasStrikethrough = false;
-                if (i > 0)
-                {
-                    rtb.Select(i - 1, 1);
-                    wasBold = rtb.SelectionFont.Bold;
-                    wasItalic = rtb.SelectionFont.Italic;
-                    wasStrikethrough = rtb.SelectionFont.Strikeout;
-                }
-
-                if (!isBold && wasBold) result.Append(boldChar);
-                if (!isItalic && wasItalic) result.Append(italicChar);
-                if (!isStrikethrough && wasStrikethrough) result.Append(strikeChar);
-
-                if (isBold && !wasBold) result.Append(boldChar);
-                if (isItalic && !wasItalic) result.Append(italicChar);
-                if (isStrikethrough && !wasStrikethrough) result.Append(strikeChar);
-                
-                result.Append(rtb.Text[i]);
-            }
-
-            rtb.Select(rtb.Text.Length - 1, 1);
-            if (rtb.SelectionFont.Bold) result.Append(boldChar);
-            if (rtb.SelectionFont.Italic) result.Append(italicChar);
-            if (rtb.SelectionFont.Strikeout) result.Append(strikeChar);
-            
-            rtb.Select(0, 0);
-            return result.ToString();
-        }
-        // =================================================================================
-
         private void button1_Click(object sender, EventArgs e)
         {
             try
             {
                 textBox1.AppendLine("sending text message...");
                 
-                // --- CHANGE 1 of 3: Use the converter here ---
+                // MODIFIED: Use the converter to get formatted text
                 var message = ConvertRtfToWhatsAppFormat(textmsg);
 
                 if (string.IsNullOrWhiteSpace(message))
@@ -122,7 +70,7 @@ namespace WhatsappAgentUI
                 try
                 {
                     currentCount++;
-                    // No change needed here, as 'message' is already converted
+                    // No change needed here, 'message' is already converted
                     Messegner?.SendMessage(number.ContactNumber.ToString(), message);
                     textBox1.AppendLine($"Message sent to {number.ContactNumber}");
                     lblcount.Text = $"{currentCount}/{totalCount}";
@@ -150,8 +98,7 @@ namespace WhatsappAgentUI
                     Multiselect = false
                 };
                 
-                // The caption will be read from the RichTextBox inside the sending method
-                string message = "dummy"; // This variable is no longer used by the sending method
+                string message = "dummy"; // This is not used, caption is read from textmsg directly
 
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
@@ -164,7 +111,6 @@ namespace WhatsappAgentUI
                     {
                         SendMediaMessageToMultiple(contacts, message, openFileDialog1.FileName);
                     }
-
                     textBox1.AppendLine("image sent.");
                 }
             }
@@ -184,7 +130,7 @@ namespace WhatsappAgentUI
                 try
                 {
                     currentCount++;
-                    // --- CHANGE 2 of 3: Use the converter here for the caption ---
+                    // MODIFIED: Use the converter for the caption
                     Messegner?.SendMedia(MediaType.IMAGE_OR_VIDEO, number.ContactNumber.ToString(), FileName, ConvertRtfToWhatsAppFormat(textmsg));
                     textBox1.AppendLine($"Message sent to {number.ContactNumber}");
                     lblcount.Text = $"{currentCount}/{totalCount}";
@@ -201,24 +147,14 @@ namespace WhatsappAgentUI
         {
             try
             {
-                foreach (var process in Process.GetProcessesByName("chromedriver"))
-                {
-                    process.Kill();
-                }
-                foreach (var process in Process.GetProcessesByName("chrome"))
-                {
-                    process.Kill();
-                }
-                foreach (var process in Process.GetProcessesByName("chromium"))
-                {
-                    process.Kill();
-                }
-                // Use textBox1 to log instead of Console
-                textBox1.Invoke(() => textBox1.AppendLine("✅ All Chrome/Chromium processes terminated."));
+                foreach (var process in Process.GetProcessesByName("chromedriver")) { process.Kill(); }
+                foreach (var process in Process.GetProcessesByName("chrome")) { process.Kill(); }
+                foreach (var process in Process.GetProcessesByName("chromium")) { process.Kill(); }
+                Console.WriteLine("✅ All Chrome/Chromium processes terminated.");
             }
             catch (Exception ex)
             {
-                textBox1.Invoke(() => textBox1.AppendLine("⚠️ Failed to kill browser processes: " + ex.Message));
+                Console.WriteLine("⚠️ Failed to kill browser processes: " + ex.Message);
             }
         }
 
@@ -237,25 +173,21 @@ namespace WhatsappAgentUI
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     textBox1.AppendLine("sending attachment...");
-
-                    // --- CHANGE 3 of 3: Use the converter here for the caption ---
-                    // Note: You were sending to 'txtmobile.Text', this assumes you want to send to the loaded contact list instead.
-                    // If you want to send to a single number, you would need different logic here.
-                    // This example assumes bulk sending for consistency.
-                    if(contacts != null && contacts.Any())
+                    // This logic assumes you want to send to the loaded contacts list.
+                    if (contacts != null && contacts.Count > 0)
                     {
-                         foreach(var contact in contacts)
-                         {
-                              Messegner?.SendMedia(MediaType.ATTACHMENT, contact.ContactNumber.ToString(), openFileDialog1.FileName, ConvertRtfToWhatsAppFormat(textmsg));
-                              textBox1.AppendLine($"Attachment sent to {contact.ContactNumber}");
-                              Thread.Sleep(3000);
-                         }
+                        foreach (var contact in contacts)
+                        {
+                            // MODIFIED: Use the converter for the caption
+                            Messegner?.SendMedia(MediaType.ATTACHMENT, contact.ContactNumber.ToString(), openFileDialog1.FileName, ConvertRtfToWhatsAppFormat(textmsg));
+                            textBox1.AppendLine($"Attachment sent to {contact.ContactNumber}");
+                            Thread.Sleep(3000);
+                        }
                     }
                     else
                     {
-                         textBox1.AppendLine("⚠️ No contacts loaded to send attachment to.");
+                        textBox1.AppendLine("⚠️ No contacts loaded to send attachment to.");
                     }
-                   
                     textBox1.AppendLine("attachment sending finished.");
                 }
             }
@@ -269,7 +201,6 @@ namespace WhatsappAgentUI
         {
             try
             {
-
                 textBox1.AppendLine("logging out...");
                 Messegner?.Logout();
                 textBox1.AppendLine("logged out.");
@@ -287,10 +218,118 @@ namespace WhatsappAgentUI
             }
         }
 
+        // =================================================================================
+        // ===== START: NEW METHODS FOR FORMATTING BUTTONS AND TEXT CONVERSION ==========
+        // =================================================================================
+
+        /// <summary>
+        /// Converts RichTextBox formatting (Bold, Italic, Strikethrough) to WhatsApp's markdown.
+        /// </summary>
+        private string ConvertRtfToWhatsAppFormat(RichTextBox rtb)
+        {
+            if (string.IsNullOrEmpty(rtb.Text)) return string.Empty;
+            var result = new StringBuilder();
+            const char boldChar = '*';
+            const char italicChar = '_';
+            const char strikeChar = '~';
+
+            for (int i = 0; i < rtb.Text.Length; i++)
+            {
+                rtb.Select(i, 1);
+                bool isBold = rtb.SelectionFont.Bold;
+                bool isItalic = rtb.SelectionFont.Italic;
+                bool isStrikethrough = rtb.SelectionFont.Strikeout;
+
+                bool wasBold = false, wasItalic = false, wasStrikethrough = false;
+                if (i > 0)
+                {
+                    rtb.Select(i - 1, 1);
+                    wasBold = rtb.SelectionFont.Bold;
+                    wasItalic = rtb.SelectionFont.Italic;
+                    wasStrikethrough = rtb.SelectionFont.Strikeout;
+                }
+
+                if (!isBold && wasBold) result.Append(boldChar);
+                if (!isItalic && wasItalic) result.Append(italicChar);
+                if (!isStrikethrough && wasStrikethrough) result.Append(strikeChar);
+
+                if (isBold && !wasBold) result.Append(boldChar);
+                if (isItalic && !wasItalic) result.Append(italicChar);
+                if (isStrikethrough && !wasStrikethrough) result.Append(strikeChar);
+
+                result.Append(rtb.Text[i]);
+            }
+
+            rtb.Select(rtb.Text.Length - 1, 1);
+            if (rtb.SelectionFont.Bold) result.Append(boldChar);
+            if (rtb.SelectionFont.Italic) result.Append(italicChar);
+            if (rtb.SelectionFont.Strikeout) result.Append(strikeChar);
+
+            rtb.Select(0, 0);
+            return result.ToString();
+        }
+
+        // This is the code for your BOLD button
+        private void btnBold_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont;
+            FontStyle newStyle;
+            if (textmsg.SelectionFont.Bold)
+            {
+                newStyle = currentFont.Style & ~FontStyle.Bold;
+            }
+            else
+            {
+                newStyle = currentFont.Style | FontStyle.Bold;
+            }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        // This is the code for your ITALIC button
+        private void btnItalic_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont;
+            FontStyle newStyle;
+
+            if (textmsg.SelectionFont.Italic)
+            {
+                newStyle = currentFont.Style & ~FontStyle.Italic;
+            }
+            else
+            {
+                newStyle = currentFont.Style | FontStyle.Italic;
+            }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        // This is the code for your UNDERLINE button
+        private void btnUnderline_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont;
+            FontStyle newStyle;
+
+            if (textmsg.SelectionFont.Underline)
+            {
+                newStyle = currentFont.Style & ~FontStyle.Underline;
+            }
+            else
+            {
+                newStyle = currentFont.Style | FontStyle.Underline;
+            }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        // =================================================================================
+        // ===== END: NEW METHODS FOR FORMATTING BUTTONS AND TEXT CONVERSION =============
+        // =================================================================================
+
+
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Messegner?.Dispose();
-            KillChromiumProcesses(); // Ensure cleanup on close
         }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -313,7 +352,6 @@ namespace WhatsappAgentUI
             }
             else
             {
-                textBox1.AppendLine("Login successful."); // Added confirmation
                 button1.Enabled = true;
                 button2.Enabled = true;
                 button3.Enabled = true;
@@ -344,7 +382,6 @@ namespace WhatsappAgentUI
 
         private void button7_Click(object sender, EventArgs e)
         {
-            // Using your existing Contact class that takes a 'long'
             String[] contactFileData = null;
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.AddExtension = true;
@@ -352,7 +389,7 @@ namespace WhatsappAgentUI
             ofd.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                contacts.Clear(); // Clear old contacts before loading new ones
+                contacts.Clear(); // Clear old contacts first
                 contactFileData = File.ReadAllLines(ofd.FileName);
 
                 try
@@ -369,7 +406,7 @@ namespace WhatsappAgentUI
                 }
                 catch (Exception ex)
                 {
-                    textBox1.AppendLine("Error reading contacts: " + ex.Message);
+                     textBox1.AppendLine("Error loading contacts: " + ex.Message);
                 }
             }
         }
