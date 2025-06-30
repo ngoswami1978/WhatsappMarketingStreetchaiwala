@@ -107,4 +107,3 @@ WhatsAppAgent-StreetChaiWala/
 ## 📣 Credits
 
 Built by **Neeraj & Team – Street Chai Wala**
-For queries or improvements, please open an issue or contact us.
