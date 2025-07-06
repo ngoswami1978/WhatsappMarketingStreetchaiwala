@@ -38,7 +38,7 @@
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             backgroundWorkerSending = new System.ComponentModel.BackgroundWorker();
             button5 = new Button();
-            textmsg = new TextBox();
+            textmsg1 = new TextBox();
             label1 = new Label();
             label2 = new Label();
             txtmobile = new TextBox();
@@ -47,7 +47,11 @@
             button7 = new Button();
             lblcount = new Label();
             statusStrip1 = new StatusStrip();
-            richTextBox1 = new RichTextBox();
+            textmsg = new RichTextBox();
+            btnEmoji = new Button();
+            btnUnderline = new Button();
+            btnItalic = new Button();
+            btnBold = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -105,7 +109,7 @@
             textBox1.Name = "textBox1";
             textBox1.ReadOnly = true;
             textBox1.ScrollBars = ScrollBars.Vertical;
-            textBox1.Size = new Size(545, 239);
+            textBox1.Size = new Size(1135, 239);
             textBox1.TabIndex = 3;
             // 
             // button4
@@ -155,21 +159,22 @@
             button5.UseVisualStyleBackColor = true;
             button5.Click += button5_Click;
             // 
-            // textmsg
+            // textmsg1
             // 
-            textmsg.Location = new Point(568, 44);
-            textmsg.Margin = new Padding(4);
-            textmsg.Multiline = true;
-            textmsg.Name = "textmsg";
-            textmsg.Size = new Size(584, 161);
-            textmsg.TabIndex = 7;
+            textmsg1.Location = new Point(1142, 44);
+            textmsg1.Margin = new Padding(4);
+            textmsg1.Multiline = true;
+            textmsg1.Name = "textmsg1";
+            textmsg1.Size = new Size(10, 10);
+            textmsg1.TabIndex = 7;
+            textmsg1.Visible = false;
             // 
             // label1
             // 
             label1.AutoSize = true;
+            label1.BackColor = Color.LimeGreen;
             label1.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             label1.ForeColor = SystemColors.ButtonHighlight;
-            label1.Image = Properties.Resources.StreetChaiwalaLogos06;
             label1.Location = new Point(568, 15);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
@@ -214,8 +219,7 @@
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.BackColor = SystemColors.ActiveBorder;
-            checkBox1.BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
+            checkBox1.BackColor = Color.LimeGreen;
             checkBox1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
             checkBox1.ForeColor = SystemColors.ButtonHighlight;
             checkBox1.Location = new Point(15, 14);
@@ -262,22 +266,71 @@
             statusStrip1.TabIndex = 16;
             statusStrip1.Text = "statusStrip1";
             // 
-            // richTextBox1
+            // textmsg
             // 
-            richTextBox1.Location = new Point(569, 212);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(583, 398);
-            richTextBox1.TabIndex = 17;
-            richTextBox1.Text = "";
+            textmsg.Location = new Point(569, 72);
+            textmsg.Name = "textmsg";
+            textmsg.Size = new Size(583, 284);
+            textmsg.TabIndex = 17;
+            textmsg.Text = "";
+            // 
+            // btnEmoji
+            // 
+            btnEmoji.Font = new Font("Segoe UI Emoji", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            btnEmoji.Location = new Point(683, 42);
+            btnEmoji.Name = "btnEmoji";
+            btnEmoji.Size = new Size(32, 29);
+            btnEmoji.TabIndex = 25;
+            btnEmoji.Text = "😀";
+            btnEmoji.UseVisualStyleBackColor = true;
+            btnEmoji.Click += btnEmoji_Click;
+            // 
+            // btnUnderline
+            // 
+            btnUnderline.Font = new Font("Verdana", 9F, FontStyle.Underline, GraphicsUnit.Point);
+            btnUnderline.Location = new Point(645, 42);
+            btnUnderline.Name = "btnUnderline";
+            btnUnderline.Size = new Size(32, 29);
+            btnUnderline.TabIndex = 24;
+            btnUnderline.Text = "U";
+            btnUnderline.UseVisualStyleBackColor = true;
+            btnUnderline.Click += btnUnderline_Click;
+            // 
+            // btnItalic
+            // 
+            btnItalic.Font = new Font("Verdana", 9F, FontStyle.Italic, GraphicsUnit.Point);
+            btnItalic.Location = new Point(607, 42);
+            btnItalic.Name = "btnItalic";
+            btnItalic.Size = new Size(32, 29);
+            btnItalic.TabIndex = 23;
+            btnItalic.Text = "I";
+            btnItalic.UseVisualStyleBackColor = true;
+            btnItalic.Click += btnItalic_Click;
+            // 
+            // btnBold
+            // 
+            btnBold.Font = new Font("Verdana", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            btnBold.Location = new Point(569, 42);
+            btnBold.Name = "btnBold";
+            btnBold.Size = new Size(32, 29);
+            btnBold.TabIndex = 22;
+            btnBold.Text = "B";
+            btnBold.UseVisualStyleBackColor = true;
+            btnBold.Click += btnBold_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(9F, 18F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = Properties.Resources.StreetChaiwalaLogos06;
+            BackColor = Color.DarkGreen;
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1165, 636);
-            Controls.Add(richTextBox1);
+            Controls.Add(btnEmoji);
+            Controls.Add(btnUnderline);
+            Controls.Add(btnItalic);
+            Controls.Add(btnBold);
+            Controls.Add(textmsg);
             Controls.Add(statusStrip1);
             Controls.Add(lblcount);
             Controls.Add(button7);
@@ -287,7 +340,7 @@
             Controls.Add(label2);
             Controls.Add(txtmobile);
             Controls.Add(label1);
-            Controls.Add(textmsg);
+            Controls.Add(textmsg1);
             Controls.Add(button5);
             Controls.Add(button4);
             Controls.Add(textBox1);
@@ -320,7 +373,7 @@
         private System.ComponentModel.BackgroundWorker backgroundWorkerSending;
 
         private Button button5;
-        private TextBox textmsg;
+        private TextBox textmsg1;
         private Label label1;
         private Label label2;
         private TextBox txtmobile;
@@ -329,6 +382,10 @@
         private Button button7;
         private Label lblcount;
         private StatusStrip statusStrip1;
-        private RichTextBox richTextBox1;
+        private RichTextBox textmsg;
+        private Button btnEmoji;
+        private Button btnUnderline;
+        private Button btnItalic;
+        private Button btnBold;
     }
 }

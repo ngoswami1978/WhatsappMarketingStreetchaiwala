@@ -12,6 +12,7 @@ using WhatsappAgentUI.Model;
 // It's good practice to have them listed if you use methods from them.
 using System.Linq;
 using System.Threading;
+using System.Text;
 
 
 namespace WhatsappAgentUI
@@ -60,7 +61,8 @@ namespace WhatsappAgentUI
 
         private void Messegner_OnDisposed()
         {
-            this.Invoke((MethodInvoker)delegate {
+            this.Invoke((MethodInvoker)delegate
+            {
                 textBox1.AppendLine("[STATUS] Messenger has been disposed. Please restart the driver.");
                 // Re-enable start driver button and disable others
                 button6.Enabled = true;
@@ -97,8 +99,8 @@ namespace WhatsappAgentUI
             {
                 contact.Message = textmsg.Text;
                 contact.MediaType = null; // Ensure no media type is set for text messages
-                contact.FilePath = string.Empty;
-                contact.Caption = string.Empty;
+                contact.Caption = ConvertRtfToWhatsAppFormat(textmsg); // Use textmsg.Text as caption
+                contact.Message = ConvertRtfToWhatsAppFormat(textmsg);
             }
 
             StartSendingCampaign();
@@ -126,8 +128,8 @@ namespace WhatsappAgentUI
                     {
                         contact.MediaType = MediaType.IMAGE_OR_VIDEO;
                         contact.FilePath = openFileDialog1.FileName;
-                        contact.Caption = textmsg.Text; // Use textmsg.Text as caption
-                        contact.Message = string.Empty;
+                        contact.Caption = ConvertRtfToWhatsAppFormat(textmsg); // Use textmsg.Text as caption
+                        contact.Message = ConvertRtfToWhatsAppFormat(textmsg);
                     }
                     StartSendingCampaign();
                 }
@@ -154,13 +156,243 @@ namespace WhatsappAgentUI
                     {
                         contact.MediaType = MediaType.ATTACHMENT;
                         contact.FilePath = openFileDialog1.FileName;
-                        contact.Caption = textmsg.Text; // Use textmsg.Text as caption
-                        contact.Message = string.Empty;
+                        contact.Caption = ConvertRtfToWhatsAppFormat(textmsg); // Use textmsg.Text as caption
+                        contact.Message = ConvertRtfToWhatsAppFormat(textmsg);
                     }
                     StartSendingCampaign();
                 }
             }
         }
+
+        public static string ConvertRtfToWhatsAppFormat(RichTextBox rtb)
+        {
+            if (string.IsNullOrEmpty(rtb.Text))
+            {
+                return string.Empty;
+            }
+
+            var result = new StringBuilder();
+            const char boldChar = '*';
+            const char italicChar = '_';
+            const char strikeChar = '~';
+
+            bool inBold = false;
+            bool inItalic = false;
+            bool inStrike = false;
+
+            // Store original selection to restore it later, preventing UI flicker/change
+            int originalSelectionStart = rtb.SelectionStart;
+            int originalSelectionLength = rtb.SelectionLength;
+
+            for (int i = 0; i < rtb.Text.Length; i++)
+            {
+                // Temporarily select single character to get its font properties
+                // This is the standard way to inspect formatting character-by-character in RichTextBox.
+                rtb.Select(i, 1);
+                Font font = rtb.SelectionFont;
+
+                // Handle cases where font information might be missing (unlikely for valid text)
+                if (font == null)
+                {
+                    result.Append(rtb.Text[i]); // Append character as is if no font info
+                    continue;
+                }
+
+                bool isBold = font.Bold;
+                bool isItalic = font.Italic;
+                bool isStrike = font.Strikeout;
+
+                // Logic to CLOSE formatting tags
+                // If we were in a style, but the current character is NOT in that style, close it.
+                if (inBold && !isBold)
+                {
+                    result.Append(boldChar);
+                    inBold = false;
+                }
+                if (inItalic && !isItalic)
+                {
+                    result.Append(italicChar);
+                    inItalic = false;
+                }
+                if (inStrike && !isStrike)
+                {
+                    result.Append(strikeChar);
+                    inStrike = false;
+                }
+
+                // Logic to OPEN formatting tags
+                // If we were NOT in a style, but the current character IS in that style, open it.
+                if (!inBold && isBold)
+                {
+                    if (rtb.Text[i] != '\n') {
+                        result.Append(boldChar);
+                        inBold = true;
+                    }                    
+                }
+                if (!inItalic && isItalic)
+                {
+                    if (rtb.Text[i] != '\n')
+                    {
+                        result.Append(italicChar);
+                        inItalic = true;
+                    }                       
+                }
+                if (!inStrike && isStrike)
+                {
+                    if (rtb.Text[i] != '\n') {
+                        result.Append(strikeChar);
+                        inStrike = true;
+                    }                    
+                }
+
+                // Append the actual character from the RichTextBox
+
+                if (rtb.Text[i] == '\n')
+                {
+                    if (isBold)
+                    {
+                        int starCount = result.ToString().Count(c => c == boldChar);
+                        if (starCount == 1){
+                            result.Append(boldChar);
+                        }                        
+                        result.Append(rtb.Text[i]);
+                        inBold = false;
+                        isBold = false;
+                    }
+                    if (isItalic)
+                    {
+                        int starCount = result.ToString().Count(c => c == italicChar);
+                        if (starCount == 1)
+                        {
+                            result.Append(italicChar);
+                        }
+                        result.Append(rtb.Text[i]);
+                        inItalic = false;
+                        isItalic = false;
+                    }
+                    if (isStrike)
+                    {
+                        int starCount = result.ToString().Count(c => c == strikeChar);
+                        if (starCount == 1)
+                        {
+                            result.Append(strikeChar);
+                        }                        
+                        result.Append(rtb.Text[i]);
+                        inStrike = false;
+                        isStrike = false;
+                    }
+
+                    // check the previous character formate BOLD,ITALIC or STRIKECHAR added by neeraj as on date 01/07/2025
+                    rtb.Select(i-1, 1);
+                    Font fontchk = rtb.SelectionFont;
+
+                    // Handle cases where font information might be missing (unlikely for valid text)
+                    if (fontchk == null)
+                    {                        
+                        continue;
+                    }
+                    bool isBoldchk = fontchk.Bold;
+                    bool isItalicchk = fontchk.Italic;
+                    bool isStrikechk = fontchk.Strikeout;
+
+                    if (isBoldchk || isItalicchk || isStrikechk)
+                    {                        
+                        result.Append(rtb.Text[i]);
+                    }
+                    if (!isBoldchk && !isItalicchk && !isStrikechk) {
+                        result.Append(rtb.Text[i]);
+                    }
+                }
+                else
+                {
+                    result.Append(rtb.Text[i]);
+                }
+            }
+
+            // After the loop, ensure any open styles are closed.
+            // This handles cases where the text ends with an open formatting tag.
+
+            if (inBold && inItalic) {
+
+                if (inItalic)
+                {
+                    result.Append(italicChar);
+                }
+                if (inBold)
+                {
+                    result.Append(boldChar);
+                }
+            }
+            else
+            {
+                if (inBold)
+                {
+                    result.Append(boldChar);
+                }
+                if (inItalic)
+                {
+                    result.Append(italicChar);
+                }
+                if (inStrike)
+                {
+                    result.Append(strikeChar);
+                }
+            }
+
+            // Restore the RichTextBox's selection to its original state
+            rtb.Select(originalSelectionStart, originalSelectionLength);
+
+            return result.ToString();
+        }
+
+
+
+
+        //private string ConvertRtfToWhatsAppFormat(RichTextBox rtb)
+        //{
+        //    if (string.IsNullOrEmpty(rtb.Text)) return string.Empty;
+
+        //    var result = new StringBuilder();
+        //    const char boldChar = '*';
+        //    const char italicChar = '_';
+        //    const char strikeChar = '~';
+
+        //    bool inBold = false;
+        //    bool inItalic = false;
+        //    bool inStrike = false;
+
+        //    for (int i = 0; i < rtb.Text.Length; i++)
+        //    {
+        //        rtb.Select(i, 1);
+        //        Font font = rtb.SelectionFont;
+        //        if (font == null) continue;
+
+        //        bool isBold = font.Bold;
+        //        bool isItalic = font.Italic;
+        //        bool isStrike = font.Strikeout;
+
+        //        // Close styles if they are ending
+        //        if (inBold && !isBold) { result.Append(boldChar); inBold = false; }
+        //        if (inItalic && !isItalic) { result.Append(italicChar); inItalic = false; }
+        //        if (inStrike && !isStrike) { result.Append(strikeChar); inStrike = false; }
+
+        //        // Open styles if they are starting
+        //        if (!inBold && isBold) { result.Append(boldChar); inBold = true; }
+        //        if (!inItalic && isItalic) { result.Append(italicChar); inItalic = true; }
+        //        if (!inStrike && isStrike) { result.Append(strikeChar); inStrike = true; }
+
+        //        result.Append(rtb.Text[i]);
+        //    }
+
+        //    // Close any styles still open at the end
+        //    if (inBold) result.Append(boldChar);
+        //    if (inItalic) result.Append(italicChar);
+        //    if (inStrike) result.Append(strikeChar);
+
+        //    rtb.Select(0, 0); // Reset cursor
+        //    return result.ToString();
+        //}
+
 
         // "Logout" button click
         private void button3_Click(object sender, EventArgs e)
@@ -181,7 +413,7 @@ namespace WhatsappAgentUI
         {
             try
             {
-                //KillChromiumProcesses();
+                KillChromiumProcesses();
                 checkBox1.Enabled = false;
                 button6.Enabled = false;
                 textBox1.AppendLine("[INIT] Starting browser driver...");
@@ -348,7 +580,7 @@ namespace WhatsappAgentUI
             int totalCount = contactsToSend.Count;
             int successfulSends = 0;
             int failedSends = 0;
-            
+
 
 
             for (int i = 0; i < totalCount; i++)
@@ -392,7 +624,7 @@ namespace WhatsappAgentUI
 
                 // Use the randomized wait from the Messegner class
                 Messegner?.Wait(8, 20); // Random wait between 8 and 20 seconds
-}
+            }
 
             e.Result = new Tuple<int, int>(successfulSends, failedSends);
         }
@@ -455,10 +687,10 @@ namespace WhatsappAgentUI
                             process.Kill();
                             process.WaitForExit(5000); // Wait up to 5 seconds
                         }
-                        catch (Exception ex) 
+                        catch (Exception ex)
                         {
-                             // Ignore errors if process is already gone
-                             Debug.WriteLine($"Could not kill {name}: {ex.Message}");
+                            // Ignore errors if process is already gone
+                            Debug.WriteLine($"Could not kill {name}: {ex.Message}");
                         }
                     }
                 }
@@ -477,7 +709,54 @@ namespace WhatsappAgentUI
                 backgroundWorkerSending.CancelAsync();
             }
             Messegner?.Dispose();
-            //KillChromiumProcesses(); // Final cleanup
+            KillChromiumProcesses(); // Final cleanup
+        }
+
+        private void btnBold_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont ?? textmsg.Font;
+            FontStyle newStyle;
+            if (currentFont.Bold) { newStyle = currentFont.Style & ~FontStyle.Bold; }
+            else { newStyle = currentFont.Style | FontStyle.Bold; }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        private void btnItalic_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont ?? textmsg.Font;
+            FontStyle newStyle;
+            if (currentFont.Italic) { newStyle = currentFont.Style & ~FontStyle.Italic; }
+            else { newStyle = currentFont.Style | FontStyle.Italic; }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        private void btnUnderline_Click(object sender, EventArgs e)
+        {
+            textmsg.Focus();
+            Font currentFont = textmsg.SelectionFont ?? textmsg.Font;
+            FontStyle newStyle;
+            if (currentFont.Underline) { newStyle = currentFont.Style & ~FontStyle.Underline; }
+            else { newStyle = currentFont.Style | FontStyle.Underline; }
+            textmsg.SelectionFont = new Font(currentFont.FontFamily, currentFont.Size, newStyle);
+        }
+
+        private void btnEmoji_Click(object sender, EventArgs e)
+        {
+            using (frmEmojiPicker emojiForm = new frmEmojiPicker())
+            {
+                Point screenPoint = btnEmoji.PointToScreen(new Point(0, btnEmoji.Height));
+                emojiForm.Location = screenPoint;
+                if (emojiForm.ShowDialog(this) == DialogResult.OK)
+                {
+                    if (!string.IsNullOrEmpty(emojiForm.SelectedEmoji))
+                    {
+                        textmsg.Focus();
+                        textmsg.SelectedText = emojiForm.SelectedEmoji;
+                    }
+                }
+            }
         }
     }
 }
