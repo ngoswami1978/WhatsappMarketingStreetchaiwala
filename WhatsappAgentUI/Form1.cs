@@ -1,9 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel; // For BackgroundWorker
 using System.Diagnostics;
+using System.Drawing; // For Image
+using System.IO; // For File operations
 using System.Windows.Forms;
 using WhatsappAgent;
 using WhatsappAgentUI.Model;
-using System.Diagnostics;
+
+// Note: System.Linq and System.Threading are also used but may be implicitly included.
+// It's good practice to have them listed if you use methods from them.
+using System.Linq;
+using System.Threading;
+
 
 namespace WhatsappAgentUI
 {
@@ -15,237 +24,291 @@ namespace WhatsappAgentUI
         public Form1()
         {
             InitializeComponent();
+            InitializeSendingWorker(); // Call initialization for the new worker
+            textBox1.AppendLine("Welcome to WhatsApp Campaign Tool!");
+            textBox1.AppendLine("1. Click 'Start Driver' to launch browser.");
+            textBox1.AppendLine("2. Click 'Login' and scan QR code.");
+            textBox1.AppendLine("3. 'Upload Contact File' (CSV or TXT).");
+            textBox1.AppendLine("4. Type message or select media, then click 'Send'.");
         }
 
+        private void InitializeSendingWorker()
+        {
+            // backgroundWorker1 is for Login and is configured in the designer.
+
+            // Configure the new BackgroundWorker for sending messages
+            backgroundWorkerSending.WorkerReportsProgress = true; // Enable progress reporting
+            backgroundWorkerSending.WorkerSupportsCancellation = true; // Allow cancellation
+            backgroundWorkerSending.DoWork += SendCampaignWorker_DoWork;
+            backgroundWorkerSending.ProgressChanged += SendCampaignWorker_ProgressChanged;
+            backgroundWorkerSending.RunWorkerCompleted += SendCampaignWorker_RunWorkerCompleted;
+        }
+
+        // --- Messenger Event Handlers ---
         private void Messegner_OnQRReady(Image qrbmp)
         {
-            pictureBox1.Image = qrbmp;
-            textBox1.Invoke(() => textBox1.AppendLine("please scan the QR code using your Whatsapp mobile app to continue login."));
+            if (pictureBox1.InvokeRequired)
+            {
+                pictureBox1.Invoke(new Action(() => pictureBox1.Image = qrbmp));
+            }
+            else
+            {
+                pictureBox1.Image = qrbmp;
+            }
+            textBox1.Invoke(() => textBox1.AppendLine("[QR] Please scan the QR code using your WhatsApp mobile app to continue login."));
         }
 
+        private void Messegner_OnDisposed()
+        {
+            this.Invoke((MethodInvoker)delegate {
+                textBox1.AppendLine("[STATUS] Messenger has been disposed. Please restart the driver.");
+                // Re-enable start driver button and disable others
+                button6.Enabled = true;
+                checkBox1.Enabled = true;
+                button5.Enabled = false; // Login button
+                button1.Enabled = false; // Send Text
+                button2.Enabled = false; // Send Image
+                button3.Enabled = false; // Logout
+                button4.Enabled = false; // Send Attachment
+                button7.Enabled = false; // Upload Contacts
+            });
+        }
+
+
+        // --- Button Click Event Handlers ---
+
+        // "Send Text" button click
         private void button1_Click(object sender, EventArgs e)
         {
-            try
+            if (string.IsNullOrWhiteSpace(textmsg.Text))
             {
-                textBox1.AppendLine("sending text message...");
-                //Messegner?.SendMessage(txtmobile.Text, textmsg.Text);
-                //var numbers = new List<string>
-                //{
-                //    "9899846293",
-                //    "8860483590",
-                //    "7982638240"
-                //};
-
-                var message = textmsg.Text;
-                if (contacts == null || contacts.Count == 0)
-                {
-                    //textBox1.ForeColor = Color.Red;
-                    textBox1.AppendLine("⚠️ Please upload the contact list before sending messages.");
-                    //textBox1.ForeColor = Color.Black;
-                }
-                else
-                {
-                    lblcount.Text = contacts.Count.ToString();  
-                    SendMessageToMultiple(contacts, message);
-                }
-
-                //SendMessageToMultiple(contacts, message);
-                textBox1.AppendLine("text message sent.");
+                textBox1.AppendLine("⚠️ Please enter a message to send.");
+                return;
             }
-            catch (Exception ex)
+
+            if (contacts == null || contacts.Count == 0)
             {
-                textBox1.AppendLine(ex.Message);
+                textBox1.AppendLine("⚠️ Please upload the contact list before sending messages.");
+                return;
             }
-        }
-        public void SendMessageToMultiple(List<Contact> numbers, string message)
-        {
-            int totalCount = numbers.Count;
-            int currentCount = 0;
 
-            foreach (var number in numbers)
+            // Set the message for all contacts in the current campaign
+            foreach (var contact in contacts)
             {
-                try
-                {
-                    currentCount++;
-                    Messegner?.SendMessage(number.ContactNumber.ToString(), message);
-                    //SendMessage(number, message);
-                    textBox1.AppendLine($"Message sent to {number.ContactNumber}");
-                    lblcount.Text = $"{currentCount}/{totalCount}";
-                }
-                catch (Exception ex)
-                {
-                    textBox1.AppendLine($"Failed to send to {number.ContactNumber}: {ex.Message}");
-                }
-
-                // Optional: Wait 3 seconds before next message to avoid rate limits
-                Thread.Sleep(3000);
+                contact.Message = textmsg.Text;
+                contact.MediaType = null; // Ensure no media type is set for text messages
+                contact.FilePath = string.Empty;
+                contact.Caption = string.Empty;
             }
+
+            StartSendingCampaign();
         }
 
-
+        // "Send Image" button click
         private void button2_Click(object sender, EventArgs e)
         {
-            try
-            {              
-                OpenFileDialog openFileDialog1 = new OpenFileDialog
-                {
-                    Title = "Select Image File",
-                    CheckFileExists = true,
-                    CheckPathExists = true,
-                    Filter = "Images (*.BMP;*.JPG,*.PNG)|*.BMP;*.JPG;*.PNG;",
-                    Multiselect = false
-                };
-                string message = "Street Chai wala";
+            using (OpenFileDialog openFileDialog1 = new OpenFileDialog())
+            {
+                openFileDialog1.Title = "Select Image File";
+                openFileDialog1.Filter = "Images (*.BMP;*.JPG;*.PNG;*.GIF)|*.BMP;*.JPG;*.PNG;*.GIF";
+                openFileDialog1.Multiselect = false;
+
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    textBox1.AppendLine("sending image...");
                     if (contacts == null || contacts.Count == 0)
                     {
-                        //textBox1.ForeColor = Color.Red;
-                        textBox1.AppendLine("⚠️ Please upload the contact list before sending messages.");
-                        //textBox1.ForeColor = Color.Black;
+                        textBox1.AppendLine("⚠️ Please upload the contact list before sending media.");
+                        return;
                     }
-                    else {
-                        SendMediaMessageToMultiple(contacts, message, openFileDialog1.FileName);
+
+                    // Set media details for all contacts in the current campaign
+                    foreach (var contact in contacts)
+                    {
+                        contact.MediaType = MediaType.IMAGE_OR_VIDEO;
+                        contact.FilePath = openFileDialog1.FileName;
+                        contact.Caption = textmsg.Text; // Use textmsg.Text as caption
+                        contact.Message = string.Empty;
                     }
-                    
-                    //Messegner?.SendMedia(MediaType.IMAGE_OR_VIDEO, txtmobile.Text, openFileDialog1.FileName, textmsg.Text);
-
-                    textBox1.AppendLine("image sent.");
+                    StartSendingCampaign();
                 }
-            }
-            catch (Exception ex)
-            {
-                textBox1.AppendLine(ex.Message);
             }
         }
 
-        public void SendMediaMessageToMultiple(List<Contact> numbers, string message,string FileName)
-        {
-            int totalCount = numbers.Count;
-            int currentCount = 0;
-
-            foreach (var number in numbers)
-            {
-                try
-                {
-                    currentCount++;
-                    Messegner?.SendMedia(MediaType.IMAGE_OR_VIDEO, number.ContactNumber.ToString(), FileName, textmsg.Text);
-                    //SendMessage(number, message);
-                    textBox1.AppendLine($"Message sent to {number.ContactNumber}");
-                    lblcount.Text = $"{currentCount}/{totalCount}";
-                }
-                catch (Exception ex)
-                {
-                    textBox1.AppendLine($"Failed to send to {number.ContactNumber}: {ex.Message}");
-                }
-
-                // Optional: Wait 3 seconds before next message to avoid rate limits
-                Thread.Sleep(3000);
-            }
-        }
-        public void KillChromiumProcesses()
-        {
-            try
-            {
-                // Kill chromedriver
-                foreach (var process in Process.GetProcessesByName("chromedriver"))
-                {
-                    process.Kill();
-                }
-
-                // Kill chrome (or chromium) browser
-                foreach (var process in Process.GetProcessesByName("chrome"))
-                {
-                    process.Kill();
-                }
-
-                // Optional: Kill chromium if you're using a separate Chromium build
-                foreach (var process in Process.GetProcessesByName("chromium"))
-                {
-                    process.Kill();
-                }
-
-                Console.WriteLine("✅ All Chrome/Chromium processes terminated.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("⚠️ Failed to kill browser processes: " + ex.Message);
-            }
-        }
-
+        // "Send Attachment" button click
         private void button4_Click(object sender, EventArgs e)
         {
-            try
+            using (OpenFileDialog openFileDialog1 = new OpenFileDialog())
             {
-                OpenFileDialog openFileDialog1 = new OpenFileDialog
-                {
-                    Title = "Select Attachment",
-                    CheckFileExists = true,
-                    CheckPathExists = true,
-                    Multiselect = false
-                };
+                openFileDialog1.Title = "Select Attachment File";
+                openFileDialog1.Multiselect = false;
 
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    textBox1.AppendLine("sending attachment...");
-                    Messegner?.SendMedia(MediaType.ATTACHMENT, txtmobile.Text, openFileDialog1.FileName, textmsg.Text);
-                    textBox1.AppendLine("attachment sent.");
+                    if (contacts == null || contacts.Count == 0)
+                    {
+                        textBox1.AppendLine("⚠️ Please upload the contact list before sending attachment.");
+                        return;
+                    }
+                    // Set media details for all contacts
+                    foreach (var contact in contacts)
+                    {
+                        contact.MediaType = MediaType.ATTACHMENT;
+                        contact.FilePath = openFileDialog1.FileName;
+                        contact.Caption = textmsg.Text; // Use textmsg.Text as caption
+                        contact.Message = string.Empty;
+                    }
+                    StartSendingCampaign();
                 }
-            }
-            catch (Exception ex)
-            {
-                textBox1.AppendLine(ex.Message);
             }
         }
 
+        // "Logout" button click
         private void button3_Click(object sender, EventArgs e)
         {
             try
-            {                
-
-                textBox1.AppendLine("logging out...");
-                Messegner?.Logout();
-                textBox1.AppendLine("logged out.");
+            {
+                textBox1.AppendLine("[STATUS] Logging out...");
+                Messegner?.Logout(); // This will dispose the driver and trigger Messegner_OnDisposed
             }
             catch (Exception ex)
             {
-                textBox1.AppendLine(ex.Message);
-            }
-            finally
-            {
-                button1.Enabled = false;
-                button2.Enabled = false;
-                button3.Enabled = false;
-                button4.Enabled = false;
+                textBox1.AppendLine($"[ERROR] Logout failed: {ex.Message}");
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        // "Start Driver" button click
+        private void button6_Click(object sender, EventArgs e)
         {
-            Messegner?.Dispose();
+            try
+            {
+                //KillChromiumProcesses();
+                checkBox1.Enabled = false;
+                button6.Enabled = false;
+                textBox1.AppendLine("[INIT] Starting browser driver...");
+
+                Messegner = new Messegner(checkBox1.Checked);
+                Messegner.OnQRReady += Messegner_OnQRReady;
+                Messegner.OnDisposed += Messegner_OnDisposed;
+
+                textBox1.AppendLine("[INIT] Driver started successfully. Ready for login.");
+                button5.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                textBox1.AppendLine($"[ERROR] Failed to start driver: {ex.Message}");
+                button6.Enabled = true;
+                checkBox1.Enabled = true;
+            }
         }
 
-        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        // "Login" button click
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (Messegner == null)
+            {
+                textBox1.AppendLine("⚠️ Please start the driver first.");
+                return;
+            }
+            button5.Enabled = false;
+            textBox1.AppendLine("[STATUS] Attempting to log in... Please wait for QR Code.");
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        // "Upload Contact File" button click
+        private void button7_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Title = "Select Contact File (TXT or CSV)";
+                ofd.Filter = "Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|All Files (*.*)|*.*";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    contacts.Clear();
+                    textBox1.AppendLine($"[FILE] Loading contacts from: {ofd.FileName}");
+                    try
+                    {
+                        var lines = File.ReadAllLines(ofd.FileName);
+                        int lineNumber = 0;
+                        foreach (var line in lines)
+                        {
+                            lineNumber++;
+                            if (string.IsNullOrWhiteSpace(line)) continue;
+
+                            // CSV Format: Number,Message(optional),MediaType(optional),FilePath(optional),Caption(optional)
+                            var parts = line.Split(',');
+                            if (parts.Length > 0 && !string.IsNullOrWhiteSpace(parts[0]))
+                            {
+                                var contact = new Contact(parts[0].Trim());
+
+                                if (parts.Length > 1) contact.Message = parts[1].Trim();
+                                if (parts.Length > 2 && Enum.TryParse(parts[2].Trim(), true, out MediaType mediaType)) contact.MediaType = mediaType;
+                                if (parts.Length > 3) contact.FilePath = parts[3].Trim();
+                                if (parts.Length > 4) contact.Caption = parts[4].Trim();
+
+                                contacts.Add(contact);
+                            }
+                            else
+                            {
+                                textBox1.AppendLine($"[WARNING] Skipping invalid line {lineNumber}: '{line}'.");
+                            }
+                        }
+                        textBox1.AppendLine($"[FILE] Loaded {contacts.Count} contacts.");
+                        lblcount.Text = $"{contacts.Count} contacts loaded.";
+                    }
+                    catch (Exception ex)
+                    {
+                        textBox1.AppendLine($"[ERROR] Failed to load contacts: {ex.Message}");
+                        contacts.Clear();
+                        lblcount.Text = "0 contacts loaded.";
+                    }
+                }
+            }
+        }
+
+
+        // --- Background Worker Logic for Login ---
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             Messegner?.Login();
         }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            button5.Enabled = false;
-            textBox1.AppendLine("logging in...");
-            backgroundWorker1.RunWorkerAsync();
-        }
-
-        private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
             {
-                textBox1.AppendLine(e.Error.ToString());
+                textBox1.AppendLine($"[ERROR] Login failed: {e.Error.Message}");
+                button5.Enabled = true; // Re-enable login on failure
+                Messegner?.Dispose();
             }
             else
             {
+                textBox1.AppendLine("[STATUS] Login successful!");
+                pictureBox1.Image = null; // Clear QR code
+                button1.Enabled = true;
+                button2.Enabled = true;
+                button3.Enabled = true;
+                button4.Enabled = true;
+                button7.Enabled = true;
+            }
+        }
+        private void backgroundWorkerSending_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Messegner?.Login();
+        }
+
+        private void backgroundWorkerSending_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                textBox1.AppendLine($"[ERROR] Login failed: {e.Error.Message}");
+                button5.Enabled = true; // Re-enable login on failure
+                Messegner?.Dispose();
+            }
+            else
+            {
+                textBox1.AppendLine("[STATUS] Login successful!");
+                pictureBox1.Image = null; // Clear QR code
                 button1.Enabled = true;
                 button2.Enabled = true;
                 button3.Enabled = true;
@@ -254,49 +317,167 @@ namespace WhatsappAgentUI
             }
         }
 
-        private void button6_Click(object sender, EventArgs e)
+
+        // --- Background Worker Logic for Sending Campaign ---
+        private void StartSendingCampaign()
         {
+            if (Messegner == null || Messegner.IsDisposed)
+            {
+                textBox1.AppendLine("⚠️ Messenger is not initialized or logged out. Please start and log in first.");
+                return;
+            }
+            if (backgroundWorkerSending.IsBusy)
+            {
+                textBox1.AppendLine("⚠️ A sending campaign is already in progress.");
+                return;
+            }
+
+            textBox1.AppendLine($"[CAMPAIGN] Starting campaign for {contacts.Count} contacts...");
+            button1.Enabled = false;
+            button2.Enabled = false;
+            button4.Enabled = false;
+            button3.Enabled = false; // Disable logout during send
+            button7.Enabled = false; // Disable contact upload during send
+
+            backgroundWorkerSending.RunWorkerAsync(contacts);
+        }
+
+        private void SendCampaignWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            List<Contact> contactsToSend = e.Argument as List<Contact>;
+            int totalCount = contactsToSend.Count;
+            int successfulSends = 0;
+            int failedSends = 0;
+            
+
+
+            for (int i = 0; i < totalCount; i++)
+            {
+
+                if (backgroundWorkerSending.CancellationPending)
+                {
+                    e.Cancel = true;
+                    break;
+                }
+
+                Contact contact = contactsToSend[i];
+                string logMessage = $"[PROCESS] ({i + 1}/{totalCount}) Sending to {contact.ContactNumber}...";
+                backgroundWorkerSending.ReportProgress((int)(((double)(i + 1) / totalCount) * 100), logMessage);
+                int progress = (int)(((double)(i + 1) / totalCount) * 100);
+                try
+                {
+                    if (string.IsNullOrEmpty(contact.ContactNumber)) throw new ArgumentException("Contact number is empty.");
+
+                    if (contact.MediaType.HasValue && !string.IsNullOrEmpty(contact.FilePath))
+                    {
+                        Messegner?.SendMedia(contact.MediaType.Value, contact.ContactNumber, contact.FilePath, contact.Caption);
+                    }
+                    else if (!string.IsNullOrEmpty(contact.Message))
+                    {
+                        Messegner?.SendMessage(contact.ContactNumber, contact.Message);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("No message or media specified.");
+                    }
+
+                    successfulSends++;
+                    backgroundWorkerSending.ReportProgress(progress, $"[SUCCESS] Sent to {contact.ContactNumber}.");
+                }
+                catch (Exception ex)
+                {
+                    failedSends++;
+                    backgroundWorkerSending.ReportProgress(progress, $"[FAILURE] Failed for {contact.ContactNumber}: {ex.Message.Split('\n').FirstOrDefault()}");
+                }
+
+                // Use the randomized wait from the Messegner class
+                Messegner?.Wait(8, 20); // Random wait between 8 and 20 seconds
+}
+
+            e.Result = new Tuple<int, int>(successfulSends, failedSends);
+        }
+
+        private void SendCampaignWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            textBox1.AppendLine(e.UserState?.ToString());
+            lblcount.Text = $"Progress: {e.ProgressPercentage}%";
+        }
+
+        private void SendCampaignWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                textBox1.AppendLine("[CAMPAIGN] Sending was cancelled.");
+            }
+            else if (e.Error != null)
+            {
+                textBox1.AppendLine($"[CAMPAIGN ERROR] An unexpected error occurred: {e.Error.Message}");
+            }
+            else
+            {
+                var results = e.Result as Tuple<int, int>;
+                textBox1.AppendLine("\n------------------------------------------");
+                textBox1.AppendLine("[CAMPAIGN COMPLETE] Bulk messaging finished.");
+                if (results != null)
+                {
+                    textBox1.AppendLine($"Successful sends: {results.Item1}");
+                    textBox1.AppendLine($"Failed sends: {results.Item2}");
+                }
+                textBox1.AppendLine("------------------------------------------\n");
+            }
+
+            // Re-enable buttons if the driver is still active
+            if (Messegner != null && !Messegner.IsDisposed)
+            {
+                button1.Enabled = true;
+                button2.Enabled = true;
+                button3.Enabled = true;
+                button4.Enabled = true;
+                button7.Enabled = true;
+            }
+            lblcount.Text = "Campaign finished.";
+        }
+
+
+        // --- Utility Methods ---
+        public void KillChromiumProcesses()
+        {
+            textBox1.AppendLine("[CLEANUP] Terminating residual Chrome/Chromium processes...");
             try
             {
-                KillChromiumProcesses();
-
-                checkBox1.Enabled = false;
-                button6.Enabled = false;
-                textBox1.AppendLine("starting driver...");
-                Messegner = new Messegner(checkBox1.Checked);
-                Messegner.OnQRReady += Messegner_OnQRReady;
-                textBox1.AppendLine("driver started.");
-                button5.Enabled = true;
+                var processNames = new[] { "chromedriver", "chrome", "chromium" };
+                foreach (var name in processNames)
+                {
+                    foreach (var process in Process.GetProcessesByName(name))
+                    {
+                        try
+                        {
+                            process.Kill();
+                            process.WaitForExit(5000); // Wait up to 5 seconds
+                        }
+                        catch (Exception ex) 
+                        {
+                             // Ignore errors if process is already gone
+                             Debug.WriteLine($"Could not kill {name}: {ex.Message}");
+                        }
+                    }
+                }
+                textBox1.AppendLine("✅ Cleanup complete.");
             }
             catch (Exception ex)
             {
-                textBox1.AppendLine(ex.Message);
+                textBox1.AppendLine("⚠️ Failed to kill browser processes: " + ex.Message);
             }
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            String[] contactFileData = null;
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.AddExtension = true;
-            ofd.CheckFileExists = true;
-            ofd.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (backgroundWorkerSending.IsBusy)
             {
-                contactFileData = File.ReadAllLines(ofd.FileName);
-
-                try
-                {
-                    foreach (var item in contactFileData)
-                    {
-                        contacts.Add(new Contact(long.Parse(item)));
-                    }
-                }
-                catch (Exception)
-                {
-
-                }
+                backgroundWorkerSending.CancelAsync();
             }
+            Messegner?.Dispose();
+            //KillChromiumProcesses(); // Final cleanup
         }
     }
 }
