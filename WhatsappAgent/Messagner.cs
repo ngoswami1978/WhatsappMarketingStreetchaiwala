@@ -50,7 +50,7 @@ namespace WhatsappAgent
                 };
 
                 var chromeDir = Path.Combine(codebase, "chrome");
-                var chromeExe = new FileInfo(Path.Combine(codebase, "chrome\\chrome.exe")); 
+                var chromeExe = new FileInfo(Path.Combine(codebase, "chrome\\chrome.exe"));
                 var chromeDll = new FileInfo(Path.Combine(codebase, "chrome\\chrome.dll"));
                 var chromeZip = new FileInfo(Path.Combine(codebase, "chrome\\chrome.zip"));
 
@@ -77,8 +77,9 @@ namespace WhatsappAgent
 
                 options.BinaryLocation = chromeExe.FullName;
 
-                options.AddArgument($"--user-data-dir={tempPath.Replace("\\","\\\\")}\\\\Chrome\\\\UserData");
-                if (hideWindow) {
+                options.AddArgument($"--user-data-dir={tempPath.Replace("\\", "\\\\")}\\\\Chrome\\\\UserData");
+                if (hideWindow)
+                {
                     options.AddArgument("--headless");
                     options.AddArgument("--disable-gpu");
                     options.AddArgument("--no-sandbox");
@@ -160,8 +161,8 @@ namespace WhatsappAgent
                     }
                     else if (foundQR) // If QR was found but now disappeared (e.g., timed out on WhatsApp side)
                     {
-                         Console.WriteLine("[LOGIN] QR code disappeared, re-scanning might be needed.");
-                         foundQR = false; // Reset to re-attempt QR capture
+                        Console.WriteLine("[LOGIN] QR code disappeared, re-scanning might be needed.");
+                        foundQR = false; // Reset to re-attempt QR capture
                     }
                 }
 
@@ -176,7 +177,7 @@ namespace WhatsappAgent
         {
             // Execute JavaScript to get the base64 data URL of the canvas
             var base64Img = driver.ExecuteJavaScript<string>("return arguments[0].toDataURL('image/png').substring(22);", ele);
-            
+
             Image img = null;
             using (var stream = new MemoryStream(Convert.FromBase64String(base64Img)))
             {
@@ -309,7 +310,7 @@ namespace WhatsappAgent
         {
             try
             {
-                if(string.IsNullOrEmpty(number))
+                if (string.IsNullOrEmpty(number))
                     throw new ArgumentException("Recipient number is required.", nameof(number));
 
                 if (string.IsNullOrEmpty(message))
@@ -320,6 +321,24 @@ namespace WhatsappAgent
                 var url = $"https://web.whatsapp.com/send?phone={number}&text={HttpUtility.UrlEncode(message)}&type=phone_number&app_absent=0";
                 driver.Navigate().GoToUrl(url);
                 Console.WriteLine($"[INFO] Navigating to chat with number: {number}");
+
+                // --- NEW: LOGIC TO DETECT SLOW CHAT LOADING ---
+                try
+                {
+                    var shortWait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                    var loadingElement = shortWait.Until(d => d.FindElements(By.XPath("//div[contains(text(), 'Loading chat')]")).FirstOrDefault());
+                    if (loadingElement != null && loadingElement.Displayed)
+                    {
+                        Console.WriteLine("[INFO] Chat is loading slowly. Extending wait time...");
+                        Wait(20, 30); // Wait for 20-30 seconds as requested
+                    }
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    // This is the expected, good outcome. It means "Loading chat" did not appear.
+                    Console.WriteLine("[INFO] Chat loaded quickly.");
+                }
+                // --- END: NEW LOGIC ---
 
                 // Wait for the message input box using a more stable selector
                 // [data-testid="compose-input"] is a common alternative. Verify this in browser dev tools.
@@ -346,7 +365,7 @@ namespace WhatsappAgent
                         new Actions(driver).KeyDown(Keys.Shift).SendKeys(Keys.Enter).KeyUp(Keys.Shift).Perform();
                     }
                 }
-                
+
                 // Send the message by pressing Enter
                 textbox.SendKeys(Keys.Enter);
                 Console.WriteLine("[INFO] Message typed, pressing Enter to send.");
@@ -380,10 +399,10 @@ namespace WhatsappAgent
         /// <param name="caption">Optional caption for the media.</param>
         /// <param name="load_timeout">Timeout for page elements to load.</param>
         /// <param name="ticks_timeout">Timeout for message status checks.</param>
-        public void SendMedia(MediaType mediaType, string number, string path, string caption=null, uint load_timeout = 30, uint ticks_timeout = 20)
+        public void SendMedia(MediaType mediaType, string number, string path, string caption = null, uint load_timeout = 30, uint ticks_timeout = 20)
         {
             try
-            {                
+            {
                 CheckWindowState(); // Ensure browser window is active
 
                 if (string.IsNullOrEmpty(number))
@@ -399,6 +418,25 @@ namespace WhatsappAgent
                 driver.Url = $"https://web.whatsapp.com/send?phone={number}&text&type=phone_number&app_absent=1";
                 Console.WriteLine($"[INFO] Navigating to chat with number: {number} to send media.");
 
+                // --- NEW: LOGIC TO DETECT SLOW CHAT LOADING ---
+                try
+                {
+                    var shortWait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                    var loadingElement = shortWait.Until(d => d.FindElements(By.XPath("//div[contains(text(), 'Loading chat')]")).FirstOrDefault());
+                    if (loadingElement != null && loadingElement.Displayed)
+                    {
+                        Console.WriteLine("[INFO] Chat is loading slowly. Extending wait time...");
+                        Wait(20, 30); // Wait for 20-30 seconds as requested
+                    }
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    Console.WriteLine("[INFO] Chat loaded quickly.");
+                }
+                // --- END: NEW LOGIC ---
+
+
+
                 // Wait for the message input box (as an indicator of chat readiness)
                 // Use a more stable selector
                 var messageInputCheck = WaitForCSSElemnt("[aria-placeholder=\"Type a message\"]", load_timeout); ;
@@ -410,7 +448,7 @@ namespace WhatsappAgent
 
                 // Locate and click the attach icon
                 // [data-testid="clip"] is a common alternative for attach icon. Verify this.
-                var clip = WaitForCSSElemnt("[title='Attach']"); 
+                var clip = WaitForCSSElemnt("[title='Attach']");
                 if (clip == null)
                 {
                     Console.WriteLine("[ERROR] Attach icon not found.");
@@ -440,7 +478,7 @@ namespace WhatsappAgent
                     Console.WriteLine("[ERROR] Send button after media selection not found.");
                     throw new ElementNotVisibleException("Send button not found after media selection.");
                 }
-                
+
                 Wait(3, 7); // Random delay after clicking send button for media (e.g., 3-7 seconds)
 
                 // Add caption if provided
@@ -468,11 +506,11 @@ namespace WhatsappAgent
                         Console.WriteLine("[WARNING] Caption input box not found, proceeding without caption.");
                     }
                 }
-                
+
                 // Click the send button to finalize media sending
-                sendButton.Click(); 
+                sendButton.Click();
                 Console.WriteLine("[INFO] Media upload initiated.");
-                
+
                 TryDismissAlert(); // Dismiss any potential alerts/popups
 
                 WaitForLastMessage(ticks_timeout);
@@ -520,7 +558,7 @@ namespace WhatsappAgent
 
                 // Locate and click the confirm button in the dialog (usually the second button in a dialog role)
                 var confirmBtn = WaitForCSSElemnt("[role='dialog'] button:nth-child(2), [data-testid='popup-controls'] button:last-child", 5);
-                 if (confirmBtn == null)
+                if (confirmBtn == null)
                 {
                     Console.WriteLine("[ERROR] Logout confirmation button not found.");
                     throw new ElementNotVisibleException("Logout confirmation button not found.");
@@ -528,7 +566,7 @@ namespace WhatsappAgent
                 confirmBtn.Click();
                 Console.WriteLine("[INFO] Confirmed logout.");
                 Wait(5, 10); // Random delay after logout confirmation (e.g., 5-10 seconds)
-                
+
                 Dispose(); // Dispose the driver after successful logout
             }
             catch (NoSuchWindowException)
@@ -736,7 +774,7 @@ namespace WhatsappAgent
                         throw new NoSuchWindowException("Browser window was closed or became invalid.");
                     return false;
                 }
-                
+
                 // Switch to the main window handle to ensure correct context
                 driver.SwitchTo().Window(handle);
 

@@ -69,5 +69,15 @@ namespace WhatsappAgentUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap WhatsApp_Image_2025_07_01_at_12_47_39 {
+            get {
+                object obj = ResourceManager.GetObject("WhatsApp Image 2025-07-01 at 12.47.39", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
